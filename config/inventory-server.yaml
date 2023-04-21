@@ -1,0 +1,8 @@
+general:
+  configFile: config/inventory-server.log
+  bindAddress: :8443
+database:
+  address: localhost:3306
+  name: inventory
+  username: bitfever
+  password: bitfever
