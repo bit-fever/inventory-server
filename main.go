@@ -27,20 +27,17 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"database/sql"
 	"errors"
 	"github.com/bit-fever/inventory-server/pkg/model/config"
+	"github.com/bit-fever/inventory-server/pkg/repository"
+	"github.com/bit-fever/inventory-server/pkg/service"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"time"
-
-	"github.com/bit-fever/inventory-server/pkg/service"
 )
 
 //=============================================================================
@@ -50,7 +47,7 @@ func main() {
 	file := initLogs(cfg)
 	defer file.Close()
 
-	initDatabase(cfg)
+	repository.InitDatabase(cfg)
 	router := registerServices()
 	runHttpServer(router, cfg)
 }
@@ -96,24 +93,6 @@ func initLogs(cfg *config.Config) *os.File {
 	gin.DefaultWriter = wrt
 
 	return f
-}
-
-//=============================================================================
-
-func initDatabase(cfg *config.Config) {
-
-	log.Println("Starting database...")
-	url := cfg.Database.Username + ":" + cfg.Database.Password + "@tcp(" + cfg.Database.Address + ")/" + cfg.Database.Name
-	log.Printf("Connection url is: %s", url)
-
-	db, err := sql.Open("mysql", url)
-	if err != nil {
-		panic(err)
-	}
-
-	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
 }
 
 //=============================================================================
