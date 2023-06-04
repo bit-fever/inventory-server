@@ -22,52 +22,57 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package repository
+package db
 
-import (
-	//"database/sql"
-	//	"database/sql"
-	"github.com/bit-fever/inventory-server/pkg/model/config"
-	"gorm.io/driver/mysql"
-	"time"
-
-	//	_ "github.com/go-sql-driver/mysql"
-	"log"
-	//"time"
-	"gorm.io/gorm"
-)
+import "time"
 
 //=============================================================================
 
-var Db *gorm.DB
+type Common struct {
+	Id        uint      `json:"id" gorm:"primaryKey"`
+	CreatedAt time.Time `json:"created-at"`
+	UpdatedAt time.Time `json:"updated-at"`
+}
 
 //=============================================================================
 
-func InitDatabase(cfg *config.Config) {
+type Exchange struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
 
-	log.Println("Starting database...")
-	url := cfg.Database.Username + ":" + cfg.Database.Password + "@tcp(" + cfg.Database.Address + ")/" + cfg.Database.Name + "?charset=utf8mb4&parseTime=True"
+//=============================================================================
 
-	dialector := mysql.New(mysql.Config{
-		DSN:                       url,
-		DefaultStringSize:         256,
-		DisableDatetimePrecision:  false,
-		DontSupportRenameIndex:    false,
-		DontSupportRenameColumn:   true,
-		SkipInitializeWithVersion: false,
-	})
+type DataSource struct {
+	Id    int    `json:"id"`
+	Code  string `json:"code"`
+	Name  string `json:"name"`
+	Local bool   `json:"local"`
+}
 
-	db, err := gorm.Open(dialector, &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to the database: %v", err)
-	}
+//=============================================================================
 
-	sqlDB, err := db.DB()
-	sqlDB.SetConnMaxLifetime(time.Minute * 3)
-	sqlDB.SetMaxOpenConns(50)
-	sqlDB.SetMaxIdleConns(10)
+type Currency struct {
+	Id   int    `json:"id"`
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
 
-	Db = db
+//=============================================================================
+
+type Instrument struct {
+	Common
+	ExchangeId     int       `json:"exchange-id"`
+	DatasourceId   int       `json:"datasource-id"`
+	Symbol         string    `json:"symbol"`
+	Name           string    `json:"name"`
+	ExpirationDate time.Time `json:"expiration-date,omitempty"`
+	PriceScale     int       `json:"price-scale"`
+	MinMovement    float32   `json:"min-movement"`
+	BigPointValue  int       `json:"big-point-value"`
+	CurrencyId     int       `json:"currency-id"`
+	MarketType     string    `json:"market-type"`
+	SecurityType   string    `json:"security-type"`
 }
 
 //=============================================================================

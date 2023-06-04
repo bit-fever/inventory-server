@@ -101,9 +101,7 @@ func registerServices() *gin.Engine {
 
 	log.Println("Registering services...")
 	router := gin.Default()
-	router.GET("/api/inventory/v1/instruments", service.GetInstruments)
-	router.GET("/api/inventory/v1/instruments/:id", service.GetInstrumentId)
-	router.POST("/api/inventory/v1/instruments", service.AddInstrument)
+	service.Init(router)
 
 	return router
 }

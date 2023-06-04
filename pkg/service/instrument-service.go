@@ -26,22 +26,28 @@ package service
 
 import (
 	"github.com/bit-fever/inventory-server/pkg/model/db"
+	"github.com/bit-fever/inventory-server/pkg/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 //=============================================================================
 
-func GetInstruments(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, []db.Instrument{
-		{Code: "A", Name: "Apple"},
-		{Code: "G", Name: "Google"},
-	})
+func getInstruments(c *gin.Context) {
+
+	data := []db.Instrument{}
+	result := repository.Db.Table("instrument").Find(&data)
+
+	if result.Error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, result.Error)
+	} else {
+		c.IndentedJSON(http.StatusOK, &data)
+	}
 }
 
 //=============================================================================
 
-func AddInstrument(c *gin.Context) {
+func addInstrument(c *gin.Context) {
 	var newInstr db.Instrument
 
 	// Call BindJSON to bind the received JSON to
@@ -57,17 +63,11 @@ func AddInstrument(c *gin.Context) {
 
 //=============================================================================
 
-func GetInstrumentId(c *gin.Context) {
-	//	id := c.Param("id")
+func getInstrumentById(c *gin.Context) {
+	id := c.Param("id")
+	var instr db.Instrument
+	repository.Db.First(&instr, id)
 
-	// Loop over the list of albums, looking for
-	// an album whose ID value matches the parameter.
-	//for _, a := range albums {
-	//	if a.ID == id {
-	//		c.IndentedJSON(http.StatusOK, a)
-	//		return
-	//	}
-	//}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
