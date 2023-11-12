@@ -22,22 +22,71 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package config
+package service
+
+import (
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/business"
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"gorm.io/gorm"
+)
 
 //=============================================================================
 
-type Config struct {
-	General struct {
-		ConfigFile  string
-		BindAddress string
+func getConnections(c *auth.Context) {
+	offset, limit, err := c.GetPagingParams()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetConnections(tx, c, offset, limit)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnList(list, offset, limit, len(*list))
+		})
 	}
 
-	Database struct {
-		Address  string
-		Name     string
-		Username string
-		Password string
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+//func getConnectionById(c *gin.Context) {
+//	id := c.Param("id")
+//
+//	data, err := db.GetInstrumentById(id)
+//
+//	if err != nil {
+//		c.IndentedJSON(http.StatusBadRequest, gin.H{
+//			"message": err.Error(),
+//			"param": id,
+//		})
+//	} else {
+//		c.IndentedJSON(http.StatusOK, &data)
+//	}
+//}
+
+//=============================================================================
+
+func addConnection(c *auth.Context) {
+	var cs business.ConnectionSpec
+	err := c.BindParamsFromBody(&cs)
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			conn, err := business.AddConnection(tx, c, &cs)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(conn)
+		})
 	}
+
+	c.ReturnError(err)
 }
 
 //=============================================================================

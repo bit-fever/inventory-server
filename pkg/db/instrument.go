@@ -22,53 +22,7 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package service
-
-import (
-	"github.com/bit-fever/inventory-server/pkg/model/db"
-	"github.com/gin-gonic/gin"
-	"net/http"
-)
+package db
 
 //=============================================================================
 
-func GetExchanges(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, []db.Exchange{
-		{Code: "A", Name: "Apple"},
-		{Code: "G", Name: "Google"},
-	})
-}
-
-//=============================================================================
-
-func AddExchange(c *gin.Context) {
-	var newInstr db.Instrument
-
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
-	if err := c.BindJSON(&newInstr); err != nil {
-		return
-	}
-
-	// Add the new album to the slice.
-	//	albums = append(albums, newAlbum)
-	c.IndentedJSON(http.StatusCreated, newInstr)
-}
-
-//=============================================================================
-
-func GetExchangeById(c *gin.Context) {
-	//	id := c.Param("id")
-
-	// Loop over the list of albums, looking for
-	// an album whose ID value matches the parameter.
-	//for _, a := range albums {
-	//	if a.ID == id {
-	//		c.IndentedJSON(http.StatusOK, a)
-	//		return
-	//	}
-	//}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
-}
-
-//=============================================================================

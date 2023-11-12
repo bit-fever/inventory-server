@@ -24,14 +24,24 @@ THE SOFTWARE.
 
 package service
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/auth/roles"
+	"github.com/bit-fever/core/req"
+	"github.com/bit-fever/inventory-server/pkg/app"
+	"github.com/gin-gonic/gin"
+	"log/slog"
+)
 
 //=============================================================================
 
-func Init(router *gin.Engine) {
-	router.GET("/api/inventory/v1/instruments", getInstruments)
-	router.GET("/api/inventory/v1/instruments/:id", getInstrumentById)
-	router.POST("/api/inventory/v1/instruments", addInstrument)
+func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
+
+	ctrl := auth.NewOidcController(cfg.Authentication.Authority, req.GetClient("bf"), logger, cfg)
+
+	router.GET ("/api/inventory/v1/connections", ctrl.Secure(getConnections, roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/connections", ctrl.Secure(addConnection,  roles.Admin_User_Service))
+	//router.GET("/api/inventory/v1/instruments/:id", getInstrumentById)
 }
 
 //=============================================================================

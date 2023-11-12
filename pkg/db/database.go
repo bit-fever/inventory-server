@@ -24,55 +24,52 @@ THE SOFTWARE.
 
 package db
 
-import "time"
+import (
+	"github.com/bit-fever/core"
+	"gorm.io/driver/mysql"
+	"log/slog"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 //=============================================================================
 
-type Common struct {
-	Id        uint      `json:"id" gorm:"primaryKey"`
-	CreatedAt time.Time `json:"created-at"`
-	UpdatedAt time.Time `json:"updated-at"`
+var dbms *gorm.DB
+
+//=============================================================================
+
+func InitDatabase(cfg *core.Database) {
+
+	slog.Info("Starting database...")
+	url := cfg.Username + ":" + cfg.Password + "@tcp(" + cfg.Address + ")/" + cfg.Name + "?charset=utf8mb4&parseTime=True"
+
+	dialector := mysql.New(mysql.Config{
+		DSN:                       url,
+		DefaultStringSize:         256,
+		DisableDatetimePrecision:  false,
+		DontSupportRenameIndex:    false,
+		DontSupportRenameColumn:   true,
+		SkipInitializeWithVersion: false,
+	})
+
+	db, err := gorm.Open(dialector, &gorm.Config{})
+	if err != nil {
+		core.ExitWithMessage("Failed to connect to the database: "+ err.Error())
+	}
+
+	sqlDB, err := db.DB()
+	sqlDB.SetConnMaxLifetime(time.Minute * 3)
+	sqlDB.SetMaxOpenConns(50)
+	sqlDB.SetMaxIdleConns(10)
+
+	dbms = db
 }
 
 //=============================================================================
 
-type Exchange struct {
-	Code string `json:"code"`
-	Name string `json:"name"`
-}
-
-//=============================================================================
-
-type DataSource struct {
-	Id    int    `json:"id"`
-	Code  string `json:"code"`
-	Name  string `json:"name"`
-	Local bool   `json:"local"`
-}
-
-//=============================================================================
-
-type Currency struct {
-	Id   int    `json:"id"`
-	Code string `json:"code"`
-	Name string `json:"name"`
-}
-
-//=============================================================================
-
-type Instrument struct {
-	Common
-	ExchangeId     int       `json:"exchange-id"`
-	DatasourceId   int       `json:"datasource-id"`
-	Symbol         string    `json:"symbol"`
-	Name           string    `json:"name"`
-	ExpirationDate time.Time `json:"expiration-date,omitempty"`
-	PriceScale     int       `json:"price-scale"`
-	MinMovement    float32   `json:"min-movement"`
-	BigPointValue  int       `json:"big-point-value"`
-	CurrencyId     int       `json:"currency-id"`
-	MarketType     string    `json:"market-type"`
-	SecurityType   string    `json:"security-type"`
+func RunInTransaction(f func(tx *gorm.DB) error) error {
+	return dbms.Transaction(f)
 }
 
 //=============================================================================

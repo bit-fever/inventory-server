@@ -22,39 +22,26 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
-
-import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
-)
+package platform
 
 //=============================================================================
 
-const component = "inventory-server"
-
-//=============================================================================
-
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
+type SystemList struct {
+	Offset   int      `json:"offset"`
+	Limit    int      `json:"limit"`
+	Overflow bool     `json:"overflow"`
+	Result   []System `json:"result"`
 }
 
 //=============================================================================
 
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+type System struct {
+	Code                  string `json:"code"`
+	Name                  string `json:"name"`
+	SupportsFeed          bool   `json:"supportsFeed"`
+	SupportsBroker        bool   `json:"supportsBroker"`
+	SupportsMultipleFeeds bool   `json:"supportsMultipleFeeds"`
+	SupportsInventory     bool   `json:"supportsInventory"`
 }
 
 //=============================================================================

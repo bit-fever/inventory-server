@@ -24,51 +24,56 @@ THE SOFTWARE.
 
 package service
 
-import (
-	"github.com/bit-fever/inventory-server/pkg/model/db"
-	"github.com/bit-fever/inventory-server/pkg/repository"
-	"github.com/gin-gonic/gin"
-	"net/http"
-)
+//=============================================================================
+
+//func getInstruments(c *gin.Context, us *auth.UserSession) {
+//
+//	data, err := db.GetInstruments(nil, 0, 10000)
+//
+//	if err != nil {
+//		c.IndentedJSON(http.StatusBadRequest, err.Error)
+//	} else {
+//		c.IndentedJSON(http.StatusOK, &data)
+//	}
+//}
 
 //=============================================================================
 
-func getInstruments(c *gin.Context) {
-
-	data := []db.Instrument{}
-	result := repository.Db.Table("instrument").Find(&data)
-
-	if result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, result.Error)
-	} else {
-		c.IndentedJSON(http.StatusOK, &data)
-	}
-}
-
-//=============================================================================
-
-func addInstrument(c *gin.Context) {
-	var newInstr db.Instrument
-
-	// Call BindJSON to bind the received JSON to
-	// newAlbum.
-	if err := c.BindJSON(&newInstr); err != nil {
-		return
-	}
-
-	// Add the new album to the slice.
-	//	albums = append(albums, newAlbum)
-	c.IndentedJSON(http.StatusCreated, newInstr)
-}
+//func getInstrumentById(c *gin.Context) {
+//	id := c.Param("id")
+//
+//	data, err := db.GetInstrumentById(id)
+//
+//	if err != nil {
+//		c.IndentedJSON(http.StatusBadRequest, gin.H{
+//			"message": err.Error(),
+//			"param": id,
+//		})
+//	} else {
+//		c.IndentedJSON(http.StatusOK, &data)
+//	}
+//}
 
 //=============================================================================
 
-func getInstrumentById(c *gin.Context) {
-	id := c.Param("id")
-	var instr db.Instrument
-	repository.Db.First(&instr, id)
-
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
-}
+//func addInstrument(c *gin.Context) {
+//	var instr db.Instrument
+//	err := c.BindJSON(&instr)
+//
+//	if err != nil {
+//		c.IndentedJSON(http.StatusBadRequest, err)
+//	} else {
+//		log.Printf("addInstrument: Symbol='%v', Name='%v'", instr.Symbol, instr.Name)
+//		err = db.AddInstrument(&instr)
+//
+//		if err != nil {
+//			c.IndentedJSON(http.StatusBadRequest, &instr)
+//			log.Printf("addInstrument: Cannot add instrument --> %v", err)
+//		} else {
+//			c.IndentedJSON(http.StatusCreated, &instr)
+//			log.Printf("addInstrument: Added with id=%v", instr.Id)
+//		}
+//	}
+//}
 
 //=============================================================================

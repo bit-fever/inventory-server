@@ -22,39 +22,59 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package business
 
 import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
+	"github.com/bit-fever/core/auth"
 	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+	"github.com/bit-fever/inventory-server/pkg/platform"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-const component = "inventory-server"
+func GetConnections(tx *gorm.DB, c *auth.Context, offset int, limit int) (*[]db.Connection, error) {
+	var filter map[string]any
 
-//=============================================================================
+	if ! c.Session.IsAdmin() {
+		filter["username"] = c.Session.Username
+	}
 
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
+	return db.GetConnections(tx, filter, offset, limit)
 }
 
 //=============================================================================
 
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connection, error) {
+	c.Log.Info("AddConnection: Adding a new connection", "code", cs.Code)
+
+	sys, err := platform.GetSystem(c, cs.SystemCode)
+	if err != nil {
+		c.Log.Info("AddConnection: Unable to retrieve the system", "code", cs.SystemCode)
+		return nil, err
+	}
+
+	if sys == nil {
+		c.Log.Info("AddConnection: System was not found", "code", cs.SystemCode)
+		return nil, err
+	}
+
+	var conn db.Connection
+	conn.Username              = c.Session.Username
+	conn.Code                  = cs.Code
+	conn.Name                  = cs.Name
+	conn.SystemCode            = cs.SystemCode
+	conn.SystemConfig          = cs.SystemConfig
+	conn.SystemName            = sys.Name
+	conn.SupportsFeed          = sys.SupportsFeed
+	conn.SupportsBroker        = sys.SupportsBroker
+	conn.SupportsMultipleFeeds = sys.SupportsMultipleFeeds
+	conn.SupportsInventory     = sys.SupportsInventory
+
+	err = db.AddConnection(tx, &conn)
+
+	c.Log.Info("AddConnection: Connection added", "code", cs.Code, "id", conn.Id)
+	return &conn, err
 }
 
 //=============================================================================

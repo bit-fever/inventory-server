@@ -22,52 +22,10 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package repository
+package service
 
-import (
-	//"database/sql"
-	//	"database/sql"
-	"github.com/bit-fever/inventory-server/pkg/model/config"
-	"gorm.io/driver/mysql"
-	"time"
-
-	//	_ "github.com/go-sql-driver/mysql"
-	"log"
-	//"time"
-	"gorm.io/gorm"
-)
 
 //=============================================================================
 
-var Db *gorm.DB
-
-//=============================================================================
-
-func InitDatabase(cfg *config.Config) {
-
-	log.Println("Starting database...")
-	url := cfg.Database.Username + ":" + cfg.Database.Password + "@tcp(" + cfg.Database.Address + ")/" + cfg.Database.Name + "?charset=utf8mb4&parseTime=True"
-
-	dialector := mysql.New(mysql.Config{
-		DSN:                       url,
-		DefaultStringSize:         256,
-		DisableDatetimePrecision:  false,
-		DontSupportRenameIndex:    false,
-		DontSupportRenameColumn:   true,
-		SkipInitializeWithVersion: false,
-	})
-
-	db, err := gorm.Open(dialector, &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to the database: %v", err)
-	}
-
-	sqlDB, err := db.DB()
-	sqlDB.SetConnMaxLifetime(time.Minute * 3)
-	sqlDB.SetMaxOpenConns(50)
-	sqlDB.SetMaxIdleConns(10)
-
-	Db = db
-}
 
 //=============================================================================

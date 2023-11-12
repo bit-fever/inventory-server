@@ -22,39 +22,15 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
-
-import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
-)
+package business
 
 //=============================================================================
 
-const component = "inventory-server"
-
-//=============================================================================
-
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
-}
-
-//=============================================================================
-
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+type ConnectionSpec struct {
+	Code         string `json:"code"       binding:"required"`
+	Name         string `json:"name"       binding:"required"`
+	SystemCode   string `json:"systemCode" binding:"required"`
+	SystemConfig string `json:"systemConfig"`
 }
 
 //=============================================================================

@@ -22,8 +22,17 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package repository
+package app
+
+import "github.com/bit-fever/core"
 
 //=============================================================================
+
+type Config struct {
+	core.Application
+	core.Database
+	core.Authentication
+	core.Platform
+}
 
 //=============================================================================

@@ -1,8 +1,15 @@
-general:
-  configFile: config/inventory-server.log
-  bindAddress: :8443
+application:
+  bindAddress: :8447
+  production: false
+  debug: false
 database:
   address: localhost:3400
   name: inventory
   username: bitfever
   password: bitfever
+authentication:
+  authority: https://bitfever-server:8443/auth/realms/bitfever
+  clientId: bitfever-backend
+  clientSecret: xyz
+platform:
+  system: https://bitfever-server:8449/api/system
