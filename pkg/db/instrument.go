@@ -24,5 +24,26 @@ THE SOFTWARE.
 
 package db
 
+import (
+	"github.com/bit-fever/core/req"
+	"gorm.io/gorm"
+)
+
 //=============================================================================
 
+func getInstrumentBySourceId(tx *gorm.DB, table string, id uint) (*[]Instrument, error) {
+	var list []Instrument
+
+	filter := map[string]any{}
+	filter["product_source_id"] = id
+
+	res := tx.Table(table).Where(filter).Order("expiration_date").Find(&list)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	return &list, nil
+}
+
+//=============================================================================

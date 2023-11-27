@@ -22,47 +22,86 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package db
+package business
 
 import (
+	"github.com/bit-fever/core/auth"
 	"github.com/bit-fever/core/req"
+	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func GetConnections(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]Connection, error) {
-	var list []Connection
-	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
-
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
+func GetProductBrokersFull(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.ProductBrokerFull, error) {
+	if ! c.Session.IsAdmin() {
+		filter["username"] = c.Session.Username
 	}
 
-	return &list, nil
+	return db.GetProductBrokersFull(tx, filter, offset, limit)
 }
 
 //=============================================================================
 
-func GetConnectionById(tx *gorm.DB, id uint) (*Connection, error) {
-	var list []Connection
-	res := tx.Find(&list, id)
+func GetProductBrokerByIdExt(tx *gorm.DB, c *auth.Context, id uint, includeInstruments bool) (*ProductBrokerExt, error) {
 
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
+	//--- Get product broker
+
+	pb, err := db.GetProductBrokerById(tx, id)
+	if err != nil {
+		return nil, err
+	}
+	if pb == nil {
+		return nil, req.NewNotFoundError("Product broker not found: %v", id)
 	}
 
-	if len(list) == 1 {
-		return &list[0], nil
+	//--- Get product
+
+	pr, err := db.GetProductById(tx, pb.ProductId)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
-}
+	//--- Check access
 
-//=============================================================================
+	if ! c.Session.IsAdmin() {
+		if pr.Username != c.Session.Username {
+			return nil, req.NewForbiddenError("Product broker not owned by user: %v", id)
+		}
+	}
 
-func AddConnection(tx *gorm.DB, conn *Connection) error {
-	return tx.Create(conn).Error
+	//--- Get connection
+
+	co, err := db.GetConnectionById(tx, pb.BrokerId)
+	if err != nil {
+		return nil, err
+	}
+
+	//--- Get currency
+
+	cu, err := db.GetCurrencyById(tx, pr.CurrencyId)
+	if err != nil {
+		return nil, err
+	}
+
+	//--- Add instruments, if it is the case
+
+	var instruments *[]db.Instrument
+
+	if includeInstruments {
+		instruments, err = db.GetInstrumentBrokersByBrokerId(tx, pb.Id)
+	}
+
+	//--- Put all together
+
+	pbe := ProductBrokerExt{
+		ProductBroker: *pb,
+		Product: PbfProductEx{ *pr, *cu},
+		Broker: *co,
+		Instruments: *instruments,
+	}
+
+	return &pbe, nil
 }
 
 //=============================================================================

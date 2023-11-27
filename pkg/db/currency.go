@@ -31,21 +31,8 @@ import (
 
 //=============================================================================
 
-func GetConnections(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]Connection, error) {
-	var list []Connection
-	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
-
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
-	}
-
-	return &list, nil
-}
-
-//=============================================================================
-
-func GetConnectionById(tx *gorm.DB, id uint) (*Connection, error) {
-	var list []Connection
+func GetCurrencyById(tx *gorm.DB, id uint) (*Currency, error) {
+	var list []Currency
 	res := tx.Find(&list, id)
 
 	if res.Error != nil {
@@ -57,12 +44,6 @@ func GetConnectionById(tx *gorm.DB, id uint) (*Connection, error) {
 	}
 
 	return nil, nil
-}
-
-//=============================================================================
-
-func AddConnection(tx *gorm.DB, conn *Connection) error {
-	return tx.Create(conn).Error
 }
 
 //=============================================================================

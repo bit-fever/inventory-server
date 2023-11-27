@@ -24,6 +24,8 @@ THE SOFTWARE.
 
 package business
 
+import "github.com/bit-fever/inventory-server/pkg/db"
+
 //=============================================================================
 
 type ConnectionSpec struct {
@@ -31,6 +33,33 @@ type ConnectionSpec struct {
 	Name         string `json:"name"       binding:"required"`
 	SystemCode   string `json:"systemCode" binding:"required"`
 	SystemConfig string `json:"systemConfig"`
+}
+
+//=============================================================================
+//=== ProductBroker & ProductFeed composite structs
+//=============================================================================
+
+type ProductBrokerExt struct {
+	db.ProductBroker
+	Product     PbfProductEx    `json:"product"`
+	Broker      db.Connection   `json:"feed"`
+	Instruments []db.Instrument `json:"instruments"`
+}
+
+//=============================================================================
+
+type ProductFeedExt struct {
+	db.ProductFeed
+	Product     PbfProductEx    `json:"product"`
+	Feed        db.Connection   `json:"feed"`
+	Instruments []db.Instrument `json:"instruments"`
+}
+
+//=============================================================================
+
+type PbfProductEx struct {
+	db.Product
+	Currency db.Currency `json:"currency"`
 }
 
 //=============================================================================

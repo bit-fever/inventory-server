@@ -77,6 +77,7 @@ type Product struct {
 	Common
 	ExchangeId  uint   `json:"exchangeId"`
 	CurrencyId  uint   `json:"currencyId"`
+	SessionId   uint   `json:"sessionId"`
 	Username    string `json:"username"`
 	Symbol      string `json:"symbol"`
 	MarketType  string `json:"marketType"`
@@ -112,6 +113,15 @@ type ProductBroker struct {
 
 //=============================================================================
 
+type ProductBrokerFull struct {
+	ProductBroker
+	CurrencyCode     string     `json:"currencyCode"`
+	ConnectionCode   string     `json:"connectionCode"`
+	ProductSymbol    string     `json:"productSymbol"`
+}
+
+//=============================================================================
+
 type Instrument struct {
 	Common
 	ProductSourceId  uint       `json:"productSourceId"`
@@ -127,6 +137,52 @@ type ProductSession struct {
 	Username  string `json:"username"`
 	Name      string `json:"name"`
 	Config    string `json:"config"`
+}
+
+//=============================================================================
+//===
+//=== Table names
+//===
+//=============================================================================
+
+func (Exchange) TableName() string {
+	return "exchange"
+}
+
+//=============================================================================
+
+func (Currency) TableName() string {
+	return "currency"
+}
+
+//=============================================================================
+
+func (Connection) TableName() string {
+	return "connection"
+}
+
+//=============================================================================
+
+func (Product) TableName() string {
+	return "product"
+}
+
+//=============================================================================
+
+func (ProductFeed) TableName() string {
+	return "product_feed"
+}
+
+//=============================================================================
+
+func (ProductBroker) TableName() string {
+	return "product_broker"
+}
+
+//=============================================================================
+
+func (ProductSession) TableName() string {
+	return "product_session"
 }
 
 //=============================================================================

@@ -39,9 +39,11 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 
 	ctrl := auth.NewOidcController(cfg.Authentication.Authority, req.GetClient("bf"), logger, cfg)
 
-	router.GET ("/api/inventory/v1/connections", ctrl.Secure(getConnections, roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/connections", ctrl.Secure(addConnection,  roles.Admin_User_Service))
-	//router.GET("/api/inventory/v1/instruments/:id", getInstrumentById)
+	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,          roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,       roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,           roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/product-brokers",     ctrl.Secure(getProductBrokersFull,   roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/product-brokers/:id", ctrl.Secure(getProductBrokerByIdExt, roles.Admin_User_Service))
 }
 
 //=============================================================================

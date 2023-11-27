@@ -34,11 +34,12 @@ import (
 //=============================================================================
 
 func getConnections(c *auth.Context) {
+	var filter map[string]any
 	offset, limit, err := c.GetPagingParams()
 
 	if err == nil {
 		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			list, err := business.GetConnections(tx, c, offset, limit)
+			list, err := business.GetConnections(tx, c, filter, offset, limit)
 
 			if err != nil {
 				return err
@@ -53,20 +54,23 @@ func getConnections(c *auth.Context) {
 
 //=============================================================================
 
-//func getConnectionById(c *gin.Context) {
-//	id := c.Param("id")
-//
-//	data, err := db.GetInstrumentById(id)
-//
-//	if err != nil {
-//		c.IndentedJSON(http.StatusBadRequest, gin.H{
-//			"message": err.Error(),
-//			"param": id,
-//		})
-//	} else {
-//		c.IndentedJSON(http.StatusOK, &data)
-//	}
-//}
+func getConnectionById(c *auth.Context) {
+	id,err := c.GetIdFromUrl()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			conn, err := business.GetConnectionById(tx, c, id)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(conn)
+		})
+	}
+
+	c.ReturnError(err)
+}
 
 //=============================================================================
 

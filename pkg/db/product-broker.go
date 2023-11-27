@@ -22,58 +22,65 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package service
+package db
+
+import (
+	"github.com/bit-fever/core/req"
+	"gorm.io/gorm"
+)
 
 //=============================================================================
 
-//func getInstruments(c *gin.Context, us *auth.UserSession) {
-//
-//	data, err := db.GetInstruments(nil, 0, 10000)
-//
-//	if err != nil {
-//		c.IndentedJSON(http.StatusBadRequest, err.Error)
-//	} else {
-//		c.IndentedJSON(http.StatusOK, &data)
-//	}
-//}
+func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
+	var list []ProductBrokerFull
+	query :=	"SELECT pb.*, p.symbol as product_symbol, m.code as currency_code, c.code as connection_code " +
+				"FROM product_broker pb " +
+				"LEFT JOIN product    p on pb.product_id  = p.id " +
+				"LEFT JOIN connection c on pb.broker_id   = c.id " +
+				"LEFT JOIN currency   m on  p.currency_id = m.id"
+
+	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	return &list, nil
+}
 
 //=============================================================================
 
-//func getInstrumentById(c *gin.Context) {
-//	id := c.Param("id")
-//
-//	data, err := db.GetInstrumentById(id)
-//
-//	if err != nil {
-//		c.IndentedJSON(http.StatusBadRequest, gin.H{
-//			"message": err.Error(),
-//			"param": id,
-//		})
-//	} else {
-//		c.IndentedJSON(http.StatusOK, &data)
-//	}
-//}
+func GetProductBrokerById(tx *gorm.DB, id uint) (*ProductBroker, error) {
+	var list []ProductBroker
+	res := tx.Find(&list, id)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
 
 //=============================================================================
 
-//func addInstrument(c *gin.Context) {
-//	var instr db.Instrument
-//	err := c.BindJSON(&instr)
+func GetInstrumentBrokersByBrokerId(tx *gorm.DB, id uint) (*[]Instrument, error) {
+	return getInstrumentBySourceId(tx, "instrument_broker", id)
+}
+
+//=============================================================================
+
+//func GetOrCreateInstrument(tx *gorm.DB, ticker string, i *Instrument) (*Instrument, error) {
+//	res := tx.Where(&Instrument{Ticker: ticker}).FirstOrCreate(i)
 //
-//	if err != nil {
-//		c.IndentedJSON(http.StatusBadRequest, err)
-//	} else {
-//		log.Printf("addInstrument: Symbol='%v', Name='%v'", instr.Symbol, instr.Name)
-//		err = db.AddInstrument(&instr)
-//
-//		if err != nil {
-//			c.IndentedJSON(http.StatusBadRequest, &instr)
-//			log.Printf("addInstrument: Cannot add instrument --> %v", err)
-//		} else {
-//			c.IndentedJSON(http.StatusCreated, &instr)
-//			log.Printf("addInstrument: Added with id=%v", instr.Id)
-//		}
+//	if res.Error != nil {
+//		return nil, req.NewServerErrorByError(res.Error)
 //	}
+//
+//	return i, nil
 //}
 
 //=============================================================================

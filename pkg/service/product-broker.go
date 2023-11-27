@@ -22,47 +22,57 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package db
+package service
 
 import (
-	"github.com/bit-fever/core/req"
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/business"
+	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func GetConnections(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]Connection, error) {
-	var list []Connection
-	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
+func getProductBrokersFull(c *auth.Context) {
+	filter := map[string]any{}
+	offset, limit, err := c.GetPagingParams()
 
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetProductBrokersFull(tx, c, filter, offset, limit)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnList(list, offset, limit, len(*list))
+		})
 	}
 
-	return &list, nil
+	c.ReturnError(err)
 }
 
 //=============================================================================
+func getProductBrokerByIdExt(c *auth.Context) {
+	id, err := c.GetIdFromUrl()
 
-func GetConnectionById(tx *gorm.DB, id uint) (*Connection, error) {
-	var list []Connection
-	res := tx.Find(&list, id)
+	if err == nil {
+		incInstr, err := c.GetParamAsBool("instruments", false)
 
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				list, err := business.GetProductBrokerByIdExt(tx, c, id, incInstr)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnObject(&list)
+			})
+		}
 	}
 
-	if len(list) == 1 {
-		return &list[0], nil
-	}
-
-	return nil, nil
-}
-
-//=============================================================================
-
-func AddConnection(tx *gorm.DB, conn *Connection) error {
-	return tx.Create(conn).Error
+	c.ReturnError(err)
 }
 
 //=============================================================================

@@ -26,6 +26,7 @@ package business
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/req"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"github.com/bit-fever/inventory-server/pkg/platform"
 	"gorm.io/gorm"
@@ -33,14 +34,33 @@ import (
 
 //=============================================================================
 
-func GetConnections(tx *gorm.DB, c *auth.Context, offset int, limit int) (*[]db.Connection, error) {
-	var filter map[string]any
-
+func GetConnections(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.Connection, error) {
 	if ! c.Session.IsAdmin() {
 		filter["username"] = c.Session.Username
 	}
 
 	return db.GetConnections(tx, filter, offset, limit)
+}
+
+//=============================================================================
+
+func GetConnectionById(tx *gorm.DB, c *auth.Context, id uint) (*db.Connection, error){
+	conn, err := db.GetConnectionById(tx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if conn == nil {
+		return nil, req.NewNotFoundError("Connection with id='%v' was not found", id)
+	}
+
+	if ! c.Session.IsAdmin() {
+		if c.Session.Username != conn.Username {
+			return nil, req.NewForbiddenError("Connection with id='%v' is not owned by the user", id)
+		}
+	}
+
+	return conn, nil
 }
 
 //=============================================================================
@@ -56,7 +76,7 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 
 	if sys == nil {
 		c.Log.Info("AddConnection: System was not found", "code", cs.SystemCode)
-		return nil, err
+		return nil, req.NewNotFoundError("System not found: %v", cs.SystemCode)
 	}
 
 	var conn db.Connection
@@ -65,6 +85,7 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 	conn.Name                  = cs.Name
 	conn.SystemCode            = cs.SystemCode
 	conn.SystemConfig          = cs.SystemConfig
+
 	conn.SystemName            = sys.Name
 	conn.SupportsFeed          = sys.SupportsFeed
 	conn.SupportsBroker        = sys.SupportsBroker
@@ -73,8 +94,13 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 
 	err = db.AddConnection(tx, &conn)
 
-	c.Log.Info("AddConnection: Connection added", "code", cs.Code, "id", conn.Id)
-	return &conn, err
+	if err == nil {
+		c.Log.Info("AddConnection: Connection added", "code", cs.Code, "id", conn.Id)
+		return &conn, err
+	}
+
+	c.Log.Info("AddConnection: Could not add a new connection", "error", err.Error())
+	return nil, err
 }
 
 //=============================================================================
