@@ -33,60 +33,19 @@ import (
 
 //=============================================================================
 
-func getConnections(c *auth.Context) {
-	var filter map[string]any
+func getTradingSystemsFull(c *auth.Context) {
+	filter := map[string]any{}
 	offset, limit, err := c.GetPagingParams()
 
 	if err == nil {
 		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			list, err := business.GetConnections(tx, c, filter, offset, limit)
+			list, err := business.GetTradingSystemsFull(tx, c, filter, offset, limit)
 
 			if err != nil {
 				return err
 			}
 
 			return c.ReturnList(list, offset, limit, len(*list))
-		})
-	}
-
-	c.ReturnError(err)
-}
-
-//=============================================================================
-
-func getConnectionById(c *auth.Context) {
-	id,err := c.GetIdFromUrl()
-
-	if err == nil {
-		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			conn, err := business.GetConnectionById(tx, c, id)
-
-			if err != nil {
-				return err
-			}
-
-			return c.ReturnObject(conn)
-		})
-	}
-
-	c.ReturnError(err)
-}
-
-//=============================================================================
-
-func addConnection(c *auth.Context) {
-	var cs business.ConnectionSpec
-	err := c.BindParamsFromBody(&cs)
-
-	if err == nil {
-		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			conn, err := business.AddConnection(tx, c, &cs)
-
-			if err != nil {
-				return err
-			}
-
-			return c.ReturnObject(conn)
 		})
 	}
 

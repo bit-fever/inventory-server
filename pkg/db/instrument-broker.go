@@ -22,34 +22,28 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package service
+package db
 
 import (
-	"github.com/bit-fever/core/auth"
-	"github.com/bit-fever/core/auth/roles"
 	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/gin-gonic/gin"
-	"log/slog"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
+func GetInstrumentsByBrokerId(tx *gorm.DB, id uint) (*[]InstrumentBroker, error) {
+	var list []InstrumentBroker
 
-	ctrl := auth.NewOidcController(cfg.Authentication.Authority, req.GetClient("bf"), logger, cfg)
+	filter := map[string]any{}
+	filter["product_broker_id"] = id
 
-	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,          roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,       roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,           roles.Admin_User_Service))
+	res := tx.Where(filter).Order("expiration_date").Find(&list)
 
-	router.GET ("/api/inventory/v1/product-brokers",     ctrl.Secure(getProductBrokersFull,   roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-brokers/:id", ctrl.Secure(getProductBrokerByIdExt, roles.Admin_User_Service))
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
 
-	router.GET ("/api/inventory/v1/portfolios",          ctrl.Secure(getPortfolios,           roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/portfolio/tree",      ctrl.Secure(getPortfolioTree,        roles.Admin_User_Service))
-
-	router.GET ("/api/inventory/v1/trading-systems",     ctrl.Secure(getTradingSystemsFull,   roles.Admin_User_Service))
+	return &list, nil
 }
 
 //=============================================================================

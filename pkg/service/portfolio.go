@@ -26,30 +26,51 @@ package service
 
 import (
 	"github.com/bit-fever/core/auth"
-	"github.com/bit-fever/core/auth/roles"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/gin-gonic/gin"
-	"log/slog"
+	"github.com/bit-fever/inventory-server/pkg/business"
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
+func getPortfolios(c *auth.Context) {
+	filter := map[string]any{}
+	offset, limit, err := c.GetPagingParams()
 
-	ctrl := auth.NewOidcController(cfg.Authentication.Authority, req.GetClient("bf"), logger, cfg)
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetPortfolios(tx, c, filter, offset, limit)
 
-	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,          roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,       roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,           roles.Admin_User_Service))
+			if err != nil {
+				return err
+			}
 
-	router.GET ("/api/inventory/v1/product-brokers",     ctrl.Secure(getProductBrokersFull,   roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-brokers/:id", ctrl.Secure(getProductBrokerByIdExt, roles.Admin_User_Service))
+			return c.ReturnList(list, offset, limit, len(*list))
+		})
+	}
 
-	router.GET ("/api/inventory/v1/portfolios",          ctrl.Secure(getPortfolios,           roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/portfolio/tree",      ctrl.Secure(getPortfolioTree,        roles.Admin_User_Service))
+	c.ReturnError(err)
+}
 
-	router.GET ("/api/inventory/v1/trading-systems",     ctrl.Secure(getTradingSystemsFull,   roles.Admin_User_Service))
+//=============================================================================
+
+func getPortfolioTree(c *auth.Context) {
+	filter := map[string]any{}
+	offset, limit, err := c.GetPagingParams()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetPortfolioTree(tx, c, filter, offset, limit)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(list)
+		})
+	}
+
+	c.ReturnError(err)
 }
 
 //=============================================================================

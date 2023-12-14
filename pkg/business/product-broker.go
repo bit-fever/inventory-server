@@ -55,50 +55,43 @@ func GetProductBrokerByIdExt(tx *gorm.DB, c *auth.Context, id uint, includeInstr
 		return nil, req.NewNotFoundError("Product broker not found: %v", id)
 	}
 
-	//--- Get product
-
-	pr, err := db.GetProductById(tx, pb.ProductId)
-	if err != nil {
-		return nil, err
-	}
-
 	//--- Check access
 
 	if ! c.Session.IsAdmin() {
-		if pr.Username != c.Session.Username {
+		if pb.Username != c.Session.Username {
 			return nil, req.NewForbiddenError("Product broker not owned by user: %v", id)
 		}
 	}
 
 	//--- Get connection
 
-	co, err := db.GetConnectionById(tx, pb.BrokerId)
+	co, err := db.GetConnectionById(tx, pb.ConnectionId)
 	if err != nil {
 		return nil, err
 	}
 
 	//--- Get currency
 
-	cu, err := db.GetCurrencyById(tx, pr.CurrencyId)
+	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
 	if err != nil {
 		return nil, err
 	}
 
 	//--- Add instruments, if it is the case
 
-	var instruments *[]db.Instrument
+	var instruments *[]db.InstrumentBroker
 
 	if includeInstruments {
-		instruments, err = db.GetInstrumentBrokersByBrokerId(tx, pb.Id)
+		instruments, err = db.GetInstrumentsByBrokerId(tx, pb.Id)
 	}
 
 	//--- Put all together
 
 	pbe := ProductBrokerExt{
 		ProductBroker: *pb,
-		Product: PbfProductEx{ *pr, *cu},
-		Broker: *co,
-		Instruments: *instruments,
+		Connection:    *co,
+		Currency:      *cu,
+		Instruments:   *instruments,
 	}
 
 	return &pbe, nil

@@ -33,11 +33,10 @@ import (
 
 func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
 	var list []ProductBrokerFull
-	query :=	"SELECT pb.*, p.symbol as product_symbol, m.code as currency_code, c.code as connection_code " +
+	query :=	"SELECT pb.*, m.code as currency_code, c.code as connection_code " +
 				"FROM product_broker pb " +
-				"LEFT JOIN product    p on pb.product_id  = p.id " +
-				"LEFT JOIN connection c on pb.broker_id   = c.id " +
-				"LEFT JOIN currency   m on  p.currency_id = m.id"
+				"LEFT JOIN connection c on pb.connection_id = c.id " +
+				"LEFT JOIN currency   m on pb.currency_id   = m.id"
 
 	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
 
@@ -63,12 +62,6 @@ func GetProductBrokerById(tx *gorm.DB, id uint) (*ProductBroker, error) {
 	}
 
 	return nil, nil
-}
-
-//=============================================================================
-
-func GetInstrumentBrokersByBrokerId(tx *gorm.DB, id uint) (*[]Instrument, error) {
-	return getInstrumentBySourceId(tx, "instrument_broker", id)
 }
 
 //=============================================================================

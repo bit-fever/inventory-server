@@ -66,7 +66,7 @@ func GetConnectionById(tx *gorm.DB, c *auth.Context, id uint) (*db.Connection, e
 //=============================================================================
 
 func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connection, error) {
-	c.Log.Info("AddConnection: Adding a new connection", "code", cs.Code)
+	c.Log.Info("AddConnection: Adding a new connection", "code", cs.Code, "name", cs.Name)
 
 	sys, err := platform.GetSystem(c, cs.SystemCode)
 	if err != nil {

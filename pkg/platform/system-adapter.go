@@ -106,18 +106,20 @@ func loadSystems(c *auth.Context) error {
 
 	var systemList SystemList
 
-	url := c.Config.(app.Config).Platform.System +"/v1/systems"
-	err := req.DoGet(req.GetClient("bf"), url, &systemList)
+	client :=req.GetClient("bf")
+	url := c.Config.(*app.Config).Platform.System +"/v1/adapters"
+	err := req.DoGet(client, url, &systemList, c.Token)
 
 	if err != nil {
 		c.Log.Error("loadSystems: Got an error from system adapter ", "error", err.Error())
-		return err
+		return req.NewServerError("Cannot communicate with system-adapter: %v", err.Error())
 	}
 
-	var sysMap map[string]*System
+	sysMap := map[string]*System{}
 
 	for _, s := range systemList.Result {
-		sysMap[s.Code] = &s
+		ss := s
+		sysMap[s.Code] = &ss
 	}
 
 	c.Log.Info("loadSystems: Systems loaded", "systems", len(systemList.Result))

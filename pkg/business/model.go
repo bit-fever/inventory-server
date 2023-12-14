@@ -36,30 +36,48 @@ type ConnectionSpec struct {
 }
 
 //=============================================================================
+//===
+//=== Portfolio tree
+//===
+//=============================================================================
+
+type PortfolioTree struct {
+	db.Portfolio
+	Children       []*PortfolioTree    `json:"children"`
+	TradingSystems []*db.TradingSystem `json:"tradingSystems"`
+}
+
+//-----------------------------------------------------------------------------
+
+func (pt *PortfolioTree) AddChild(p *PortfolioTree) {
+	pt.Children = append(pt.Children, p)
+}
+
+//-----------------------------------------------------------------------------
+
+func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystem) {
+	pt.TradingSystems = append(pt.TradingSystems, ts)
+}
+
+//=============================================================================
+//===
 //=== ProductBroker & ProductFeed composite structs
+//===
 //=============================================================================
 
 type ProductBrokerExt struct {
 	db.ProductBroker
-	Product     PbfProductEx    `json:"product"`
-	Broker      db.Connection   `json:"feed"`
-	Instruments []db.Instrument `json:"instruments"`
+	Connection  db.Connection         `json:"connection"`
+	Currency    db.Currency           `json:"currency"`
+	Instruments []db.InstrumentBroker `json:"instruments,omitempty"`
 }
 
 //=============================================================================
 
 type ProductFeedExt struct {
 	db.ProductFeed
-	Product     PbfProductEx    `json:"product"`
-	Feed        db.Connection   `json:"feed"`
-	Instruments []db.Instrument `json:"instruments"`
-}
-
-//=============================================================================
-
-type PbfProductEx struct {
-	db.Product
-	Currency db.Currency `json:"currency"`
+	Connection  db.Connection       `json:"connection"`
+	Instruments []db.InstrumentFeed `json:"instruments,omitempty"`
 }
 
 //=============================================================================

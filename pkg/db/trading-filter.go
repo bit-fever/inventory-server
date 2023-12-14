@@ -24,26 +24,21 @@ THE SOFTWARE.
 
 package db
 
-import (
-	"github.com/bit-fever/core/req"
-	"gorm.io/gorm"
-)
-
 //=============================================================================
 
-func GetProductById(tx *gorm.DB, id uint) (*Product, error) {
-	var list []Product
-	res := tx.Find(&list, id)
-
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
-	}
-
-	if len(list) == 1 {
-		return &list[0], nil
-	}
-
-	return nil, nil
-}
+//func GetTradingFilterById(tx *gorm.DB, id uint) (*TradingFilter, error) {
+//	var list []TradingFilter
+//	res := tx.Find(&list, id)
+//
+//	if res.Error != nil {
+//		return nil, req.NewServerErrorByError(res.Error)
+//	}
+//
+//	if len(list) == 1 {
+//		return &list[0], nil
+//	}
+//
+//	return nil, nil
+//}
 
 //=============================================================================

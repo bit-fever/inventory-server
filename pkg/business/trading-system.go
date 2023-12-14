@@ -22,28 +22,32 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package db
+package business
 
 import (
-	"github.com/bit-fever/core/req"
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func getInstrumentBySourceId(tx *gorm.DB, table string, id uint) (*[]Instrument, error) {
-	var list []Instrument
-
-	filter := map[string]any{}
-	filter["product_source_id"] = id
-
-	res := tx.Table(table).Where(filter).Order("expiration_date").Find(&list)
-
-	if res.Error != nil {
-		return nil, req.NewServerErrorByError(res.Error)
+func GetTradingSystems(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.TradingSystem, error) {
+	if ! c.Session.IsAdmin() {
+		filter["username"] = c.Session.Username
 	}
 
-	return &list, nil
+	return db.GetTradingSystems(tx, filter, offset, limit)
+}
+
+//=============================================================================
+
+func GetTradingSystemsFull(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.TradingSystemFull, error) {
+	if ! c.Session.IsAdmin() {
+		filter["username"] = c.Session.Username
+	}
+
+	return db.GetTradingSystemsFull(tx, filter, offset, limit)
 }
 
 //=============================================================================
