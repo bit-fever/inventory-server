@@ -3,7 +3,7 @@ module github.com/bit-fever/inventory-server
 go 1.21
 
 require (
-	github.com/bit-fever/core v1.6.6
+	github.com/bit-fever/core v1.7.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	gorm.io/driver/mysql v1.5.2
@@ -36,6 +36,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/rabbitmq/amqp091-go v1.9.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/samber/slog-gin v1.6.0 // indirect

@@ -33,19 +33,44 @@ import (
 
 //=============================================================================
 
-func getTradingSystemsFull(c *auth.Context) {
+func getTradingSystems(c *auth.Context) {
 	filter := map[string]any{}
 	offset, limit, err := c.GetPagingParams()
 
 	if err == nil {
+		details, err := c.GetParamAsBool("details", false)
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				list, err := business.GetTradingSystems(tx, c, filter, offset, limit, details)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnList(list, offset, limit, len(*list))
+			})
+		}
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func addTradingSystem(c *auth.Context) {
+	var tss business.TradingSystemSpec
+	err := c.BindParamsFromBody(&tss)
+
+	if err == nil {
 		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			list, err := business.GetTradingSystemsFull(tx, c, filter, offset, limit)
+			ts, err := business.AddTradingSystem(tx, c, &tss)
 
 			if err != nil {
 				return err
 			}
 
-			return c.ReturnList(list, offset, limit, len(*list))
+			return c.ReturnObject(ts)
 		})
 	}
 

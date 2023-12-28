@@ -39,17 +39,23 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 
 	ctrl := auth.NewOidcController(cfg.Authentication.Authority, req.GetClient("bf"), logger, cfg)
 
-	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,          roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,       roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,           roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,      roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,   roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,       roles.Admin_User_Service))
 
-	router.GET ("/api/inventory/v1/product-brokers",     ctrl.Secure(getProductBrokersFull,   roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-brokers/:id", ctrl.Secure(getProductBrokerByIdExt, roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/product-brokers",     ctrl.Secure(getProductBrokers,   roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/product-brokers/:id", ctrl.Secure(getProductBrokerById,roles.Admin_User_Service))
 
-	router.GET ("/api/inventory/v1/portfolios",          ctrl.Secure(getPortfolios,           roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/portfolio/tree",      ctrl.Secure(getPortfolioTree,        roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/product-feeds",       ctrl.Secure(getProductFeeds,     roles.Admin_User_Service))
 
-	router.GET ("/api/inventory/v1/trading-systems",     ctrl.Secure(getTradingSystemsFull,   roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/portfolios",          ctrl.Secure(getPortfolios,       roles.Admin_User_Service))
+
+	router.GET ("/api/inventory/v1/portfolio/tree",      ctrl.Secure(getPortfolioTree,    roles.Admin_User_Service))
+
+	router.GET ("/api/inventory/v1/trading-systems",     ctrl.Secure(getTradingSystems,   roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/trading-systems",     ctrl.Secure(addTradingSystem,    roles.Admin_User_Service))
+
+	router.GET ("/api/inventory/v1/trading-sessions",    ctrl.Secure(getTradingSessions,  roles.Admin_User_Service))
 }
 
 //=============================================================================

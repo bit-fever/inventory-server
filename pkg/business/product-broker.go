@@ -33,17 +33,21 @@ import (
 
 //=============================================================================
 
-func GetProductBrokersFull(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.ProductBrokerFull, error) {
+func GetProductBrokers(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.ProductBrokerFull, error) {
 	if ! c.Session.IsAdmin() {
 		filter["username"] = c.Session.Username
 	}
 
-	return db.GetProductBrokersFull(tx, filter, offset, limit)
+	if details {
+		return db.GetProductBrokersFull(tx, filter, offset, limit)
+	}
+
+	return db.GetProductBrokers(tx, filter, offset, limit)
 }
 
 //=============================================================================
 
-func GetProductBrokerByIdExt(tx *gorm.DB, c *auth.Context, id uint, includeInstruments bool) (*ProductBrokerExt, error) {
+func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*ProductBrokerExt, error) {
 
 	//--- Get product broker
 
@@ -81,7 +85,7 @@ func GetProductBrokerByIdExt(tx *gorm.DB, c *auth.Context, id uint, includeInstr
 
 	var instruments *[]db.InstrumentBroker
 
-	if includeInstruments {
+	if details {
 		instruments, err = db.GetInstrumentsByBrokerId(tx, pb.Id)
 	}
 

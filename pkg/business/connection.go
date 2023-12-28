@@ -94,13 +94,13 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 
 	err = db.AddConnection(tx, &conn)
 
-	if err == nil {
-		c.Log.Info("AddConnection: Connection added", "code", cs.Code, "id", conn.Id)
-		return &conn, err
+	if err != nil {
+		c.Log.Error("AddConnection: Could not add a new connection", "error", err.Error())
+		return nil, err
 	}
 
-	c.Log.Info("AddConnection: Could not add a new connection", "error", err.Error())
-	return nil, err
+	c.Log.Info("AddConnection: Connection added", "code", cs.Code, "id", conn.Id)
+	return &conn, err
 }
 
 //=============================================================================

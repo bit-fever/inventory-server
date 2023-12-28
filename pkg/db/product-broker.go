@@ -31,6 +31,19 @@ import (
 
 //=============================================================================
 
+func GetProductBrokers(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
+	var list []ProductBrokerFull
+	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	return &list, nil
+}
+
+//=============================================================================
+
 func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
 	var list []ProductBrokerFull
 	query :=	"SELECT pb.*, m.code as currency_code, c.code as connection_code " +

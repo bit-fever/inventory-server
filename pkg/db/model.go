@@ -87,18 +87,24 @@ type ProductFeed struct {
 
 //=============================================================================
 
+
+type ProductFeedFull struct {
+	ProductFeed
+	ConnectionCode  string  `json:"connectionCode,omitempty"`
+}
+
+//=============================================================================
+
 type ProductBroker struct {
 	Common
 	ConnectionId     uint       `json:"connectionId"`
-	CurrencyId       uint       `json:"currencyId"`
 	Username         string     `json:"username"`
 	Symbol           string     `json:"symbol"`
 	Name             string     `json:"name"`
 	PointValue       float32    `json:"pointValue"`
 	CostPerTrade     float32    `json:"costPerTrade"`
 	MarginValue      float32    `json:"marginValue"`
-	MarginLastUpdate time.Time  `json:"marginLastUpdate"`
-	MarginAutoSync   int        `json:"marginAutoSync"`
+	CurrencyId       uint       `json:"currencyId"`
 	MarketType       string     `json:"marketType"`
 	ProductType      string     `json:"productType"`
 	Exchange         string     `json:"exchange"`
@@ -108,8 +114,8 @@ type ProductBroker struct {
 
 type ProductBrokerFull struct {
 	ProductBroker
-	CurrencyCode    string  `json:"currencyCode"`
-	ConnectionCode  string  `json:"connectionCode"`
+	CurrencyCode    string  `json:"currencyCode,omitempty"`
+	ConnectionCode  string  `json:"connectionCode,omitempty"`
 }
 
 //=============================================================================
@@ -146,28 +152,23 @@ type TradingSession struct {
 
 type TradingSystem struct {
 	Common
-	PortfolioId     uint       `json:"portfolioId"`
-	Username        string     `json:"username"`
-	ProductFeed     uint       `json:"productFeed"`
-	ProductBroker   uint       `json:"productBroker"`
-	TradingSession  uint       `json:"tradingSession"`
-	StrategyCode    string     `json:"code"`
-	Name            string     `json:"name"`
-	Status          string     `json:"status"`
-	FirstUpdate     int        `json:"firstUpdate"`
-	LastUpdate      int        `json:"lastUpdate"`
-	ClosedProfit    float64    `json:"closedProfit"`
-	TradingDays     int        `json:"tradingDays"`
-	NumTrades       int        `json:"numTrades"`
+	PortfolioId       uint    `json:"portfolioId"`
+	ProductFeedId     uint    `json:"productFeedId"`
+	ProductBrokerId   uint    `json:"productBrokerId"`
+	TradingSessionId  uint    `json:"tradingSessionId"`
+	Username          string  `json:"username"`
+	StrategyCode      string  `json:"strategyCode"`
+	Name              string  `json:"name"`
 }
 
 //=============================================================================
 
 type TradingSystemFull struct {
 	TradingSystem
-	FeedSymbol     string `json:"feedSymbol"`
-	BrokerSymbol   string `json:"brokerSymbol"`
-	PortfolioName  string `json:"portfolioName"`
+	FeedSymbol     string `json:"feedSymbol,omitempty"`
+	BrokerSymbol   string `json:"brokerSymbol,omitempty"`
+	PortfolioName  string `json:"portfolioName,omitempty"`
+	TradingSession string `json:"tradingSession,omitempty"`
 }
 
 //=============================================================================

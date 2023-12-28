@@ -33,6 +33,7 @@ type Config struct {
 	core.Database
 	core.Authentication
 	core.Platform
+	core.Messaging
 }
 
 //=============================================================================

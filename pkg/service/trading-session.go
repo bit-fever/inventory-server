@@ -22,41 +22,34 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package service
 
 import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/business"
 	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-const component = "inventory-server"
+func getTradingSessions(c *auth.Context) {
+	filter := map[string]any{}
+	offset, limit, err := c.GetPagingParams()
 
-//=============================================================================
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetTradingSessions(tx, c, filter, offset, limit)
 
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	msg.InitMessaging(&cfg.Messaging)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
-}
+			if err != nil {
+				return err
+			}
 
-//=============================================================================
+			return c.ReturnList(list, offset, limit, len(*list))
+		})
+	}
 
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+	c.ReturnError(err)
 }
 
 //=============================================================================

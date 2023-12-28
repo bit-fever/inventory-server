@@ -33,35 +33,39 @@ import (
 
 //=============================================================================
 
-func getProductBrokersFull(c *auth.Context) {
+func getProductBrokers(c *auth.Context) {
 	filter := map[string]any{}
 	offset, limit, err := c.GetPagingParams()
 
 	if err == nil {
-		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			list, err := business.GetProductBrokersFull(tx, c, filter, offset, limit)
+		details, err := c.GetParamAsBool("details", false)
 
-			if err != nil {
-				return err
-			}
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				list, err := business.GetProductBrokers(tx, c, filter, offset, limit, details)
 
-			return c.ReturnList(list, offset, limit, len(*list))
-		})
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnList(list, offset, limit, len(*list))
+			})
+		}
 	}
 
 	c.ReturnError(err)
 }
 
 //=============================================================================
-func getProductBrokerByIdExt(c *auth.Context) {
+func getProductBrokerById(c *auth.Context) {
 	id, err := c.GetIdFromUrl()
 
 	if err == nil {
-		incInstr, err := c.GetParamAsBool("instruments", false)
+		details, err := c.GetParamAsBool("details", false)
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				list, err := business.GetProductBrokerByIdExt(tx, c, id, incInstr)
+				list, err := business.GetProductBrokerById(tx, c, id, details)
 
 				if err != nil {
 					return err

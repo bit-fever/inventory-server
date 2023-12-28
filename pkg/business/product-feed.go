@@ -22,41 +22,26 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package business
 
 import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
+	"github.com/bit-fever/core/auth"
 	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-const component = "inventory-server"
+func GetProductFeeds(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.ProductFeedFull, error) {
+	if ! c.Session.IsAdmin() {
+		filter["username"] = c.Session.Username
+	}
 
-//=============================================================================
+	if details {
+		return db.GetProductFeedsFull(tx, filter, offset, limit)
+	}
 
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	msg.InitMessaging(&cfg.Messaging)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
-}
-
-//=============================================================================
-
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+	return db.GetProductFeeds(tx, filter, offset, limit)
 }
 
 //=============================================================================

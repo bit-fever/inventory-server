@@ -36,6 +36,17 @@ type ConnectionSpec struct {
 }
 
 //=============================================================================
+
+type TradingSystemSpec struct {
+	PortfolioId      uint   `json:"portfolioId"       binding:"required"`
+	ProductFeedId    uint   `json:"productFeedId"     binding:"required"`
+	ProductBrokerId  uint   `json:"productBrokerId"   binding:"required"`
+	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
+	StrategyCode     string `json:"strategyCode"      binding:"required"`
+	Name             string `json:"name"              binding:"required"`
+}
+
+//=============================================================================
 //===
 //=== Portfolio tree
 //===
@@ -43,8 +54,8 @@ type ConnectionSpec struct {
 
 type PortfolioTree struct {
 	db.Portfolio
-	Children       []*PortfolioTree    `json:"children"`
-	TradingSystems []*db.TradingSystem `json:"tradingSystems"`
+	Children       []*PortfolioTree        `json:"children"`
+	TradingSystems []*db.TradingSystemFull `json:"tradingSystems"`
 }
 
 //-----------------------------------------------------------------------------
@@ -55,7 +66,7 @@ func (pt *PortfolioTree) AddChild(p *PortfolioTree) {
 
 //-----------------------------------------------------------------------------
 
-func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystem) {
+func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystemFull) {
 	pt.TradingSystems = append(pt.TradingSystems, ts)
 }
 

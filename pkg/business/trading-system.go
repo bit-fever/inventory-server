@@ -26,15 +26,20 @@ package business
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func GetTradingSystems(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.TradingSystem, error) {
+func GetTradingSystems(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.TradingSystemFull, error) {
 	if ! c.Session.IsAdmin() {
 		filter["username"] = c.Session.Username
+	}
+
+	if details {
+		return db.GetTradingSystemsFull(tx, filter, offset, limit)
 	}
 
 	return db.GetTradingSystems(tx, filter, offset, limit)
@@ -42,12 +47,34 @@ func GetTradingSystems(tx *gorm.DB, c *auth.Context, filter map[string]any, offs
 
 //=============================================================================
 
-func GetTradingSystemsFull(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.TradingSystemFull, error) {
-	if ! c.Session.IsAdmin() {
-		filter["username"] = c.Session.Username
+func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db.TradingSystem, error) {
+	c.Log.Info("AddTradingSystem: Adding a new trading system", "strategyCode", tss.StrategyCode, "name", tss.Name)
+
+	var ts db.TradingSystem
+	ts.Username         = c.Session.Username
+	ts.StrategyCode     = tss.StrategyCode
+	ts.Name             = tss.Name
+	ts.PortfolioId      = tss.PortfolioId
+	ts.ProductFeedId    = tss.ProductFeedId
+	ts.ProductBrokerId  = tss.ProductBrokerId
+	ts.TradingSessionId = tss.TradingSessionId
+
+	err := db.AddTradingSystem(tx, &ts)
+
+	if err != nil {
+		c.Log.Error("AddTradingSystem: Could not add a new connection", "error", err.Error())
+		return nil, err
 	}
 
-	return db.GetTradingSystemsFull(tx, filter, offset, limit)
+	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msg.TypeCreate, msg.SourceTradingSystem, &ts)
+
+	if err != nil {
+		c.Log.Error("AddTradingSystem: Could not publish the update message", "error", err.Error())
+		return nil, err
+	}
+
+	c.Log.Info("AddTradingSystem: Trading system added", "trategyCode", ts.StrategyCode, "id", ts.Id)
+	return &ts, err
 }
 
 //=============================================================================

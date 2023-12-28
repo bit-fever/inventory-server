@@ -31,8 +31,8 @@ import (
 
 //=============================================================================
 
-func GetTradingSystems(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]TradingSystem, error) {
-	var list []TradingSystem
+func GetTradingSystems(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]TradingSystemFull, error) {
+	var list []TradingSystemFull
 	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
 
 	if res.Error != nil {
@@ -96,11 +96,12 @@ func GetTradingSystems(tx *gorm.DB, filter map[string]any, offset int, limit int
 
 func GetTradingSystemsFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]TradingSystemFull, error) {
 	var list []TradingSystemFull
-	query := "SELECT ts.*, pf.symbol as feed_symbol, pb.symbol as broker_symbol, p.name as portfolio_name " +
+	query := "SELECT ts.*, pf.symbol as feed_symbol, pb.symbol as broker_symbol, p.name as portfolio_name, s.name as trading_session " +
 		"FROM trading_system ts " +
-		"LEFT JOIN product_feed   pf on ts.product_feed_id   = pf.id " +
-		"LEFT JOIN product_broker pb on ts.product_broker_id = pb.id " +
-		"LEFT JOIN portfolio      p  on ts.portfolio_id      = p.id"
+		"LEFT JOIN product_feed    pf on ts.product_feed_id   = pf.id " +
+		"LEFT JOIN product_broker  pb on ts.product_broker_id = pb.id " +
+		"LEFT JOIN portfolio       p  on ts.portfolio_id      = p.id " +
+		"LEFT JOIN trading_session s  on ts.trading_session_id= s.id"
 
 	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
 
@@ -122,5 +123,11 @@ func GetTradingSystemsFull(tx *gorm.DB, filter map[string]any, offset int, limit
 //
 //	return ts, nil
 //}
+
+//=============================================================================
+
+func AddTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
+	return tx.Create(ts).Error
+}
 
 //=============================================================================

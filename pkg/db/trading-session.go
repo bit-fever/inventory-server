@@ -22,41 +22,24 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package db
 
 import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-const component = "inventory-server"
+func GetTradingSessions(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]TradingSession, error) {
+	var list []TradingSession
+	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
 
-//=============================================================================
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
 
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	msg.InitMessaging(&cfg.Messaging)
-	service.Init(engine, cfg, logger)
-	boot.RunHttpServer(engine, &cfg.Application)
-}
-
-//=============================================================================
-
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+	return &list, nil
 }
 
 //=============================================================================

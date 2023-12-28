@@ -13,3 +13,7 @@ authentication:
   clientSecret: xyz
 platform:
   system: https://bitfever-server:8449/api/system
+messaging:
+  address: localhost:8450
+  username: rabbit-admin
+  password: rabbit.admin
