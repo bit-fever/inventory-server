@@ -157,7 +157,7 @@ type TradingSystem struct {
 	ProductBrokerId   uint    `json:"productBrokerId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
 	Username          string  `json:"username"`
-	StrategyCode      string  `json:"strategyCode"`
+	WorkspaceCode     string  `json:"workspaceCode"`
 	Name              string  `json:"name"`
 }
 
@@ -169,16 +169,6 @@ type TradingSystemFull struct {
 	BrokerSymbol   string `json:"brokerSymbol,omitempty"`
 	PortfolioName  string `json:"portfolioName,omitempty"`
 	TradingSession string `json:"tradingSession,omitempty"`
-}
-
-//=============================================================================
-
-type TradingFilter struct {
-	Id              uint   `json:"id" gorm:"primaryKey"`
-	TradingSystemId uint   `json:"tradingSystemId"`
-	FilterType      string `json:"filterType"`
-	Enabled         bool   `json:"enabled"`
-	Config          string `json:"config"`
 }
 
 //=============================================================================
@@ -196,6 +186,5 @@ func (InstrumentFeed)   TableName() string { return "instrument_feed" }
 func (InstrumentBroker) TableName() string { return "instrument_broker" }
 func (TradingSession)   TableName() string { return "trading_session" }
 func (TradingSystem)    TableName() string { return "trading_system" }
-func (TradingFilter)    TableName() string { return "trading_filter" }
 
 //=============================================================================

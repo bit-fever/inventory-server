@@ -78,3 +78,24 @@ func addTradingSystem(c *auth.Context) {
 }
 
 //=============================================================================
+
+func updateTradingSystem(c *auth.Context) {
+	var tss business.TradingSystemSpec
+	err := c.BindParamsFromBody(&tss)
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			ts, err := business.UpdateTradingSystem(tx, c, &tss)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(ts)
+		})
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================

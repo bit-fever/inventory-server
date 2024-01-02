@@ -38,11 +38,12 @@ type ConnectionSpec struct {
 //=============================================================================
 
 type TradingSystemSpec struct {
+	Id               uint   `json:"id"`
 	PortfolioId      uint   `json:"portfolioId"       binding:"required"`
 	ProductFeedId    uint   `json:"productFeedId"     binding:"required"`
 	ProductBrokerId  uint   `json:"productBrokerId"   binding:"required"`
 	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
-	StrategyCode     string `json:"strategyCode"      binding:"required"`
+	WorkspaceCode    string `json:"workspaceCode"     binding:"required"`
 	Name             string `json:"name"              binding:"required"`
 }
 
@@ -89,6 +90,18 @@ type ProductFeedExt struct {
 	db.ProductFeed
 	Connection  db.Connection       `json:"connection"`
 	Instruments []db.InstrumentFeed `json:"instruments,omitempty"`
+}
+
+//=============================================================================
+//===
+//=== Messages
+//===
+//=============================================================================
+
+type TradingSystemMessage struct {
+	TradingSystem db.TradingSystem `json:"tradingSystem"`
+	ProductBroker db.ProductBroker `json:"productBroker"`
+	Currency      db.Currency      `json:"currency"`
 }
 
 //=============================================================================

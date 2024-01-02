@@ -54,6 +54,7 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 
 	router.GET ("/api/inventory/v1/trading-systems",     ctrl.Secure(getTradingSystems,   roles.Admin_User_Service))
 	router.POST("/api/inventory/v1/trading-systems",     ctrl.Secure(addTradingSystem,    roles.Admin_User_Service))
+	router.PUT ("/api/inventory/v1/trading-systems",     ctrl.Secure(updateTradingSystem, roles.Admin_User_Service))
 
 	router.GET ("/api/inventory/v1/trading-sessions",    ctrl.Secure(getTradingSessions,  roles.Admin_User_Service))
 }

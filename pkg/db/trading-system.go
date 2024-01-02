@@ -44,20 +44,20 @@ func GetTradingSystems(tx *gorm.DB, filter map[string]any, offset int, limit int
 
 //=============================================================================
 
-//func GetTradingSystemById(tx *gorm.DB, id uint) (*TradingSystem, error) {
-//	var list []TradingSystem
-//	res := tx.Find(&list, id)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	if len(list) == 1 {
-//		return &list[0], nil
-//	}
-//
-//	return nil, nil
-//}
+func GetTradingSystemById(tx *gorm.DB, id uint) (*TradingSystem, error) {
+	var list []TradingSystem
+	res := tx.Find(&list, id)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
 
 //=============================================================================
 
@@ -70,26 +70,6 @@ func GetTradingSystems(tx *gorm.DB, filter map[string]any, offset int, limit int
 //	}
 //
 //	return &list, nil
-//}
-
-//=============================================================================
-
-//func GetTradingSystemsByIdAsMap(tx *gorm.DB, ids []uint) (map[uint]*TradingSystem, error) {
-//	var list []TradingSystem
-//	res := tx.Find(&list, ids)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	tsMap := map[uint]*TradingSystem{}
-//
-//	for _, ts := range list {
-//		tsAux := ts
-//		tsMap[ts.Id] = &tsAux
-//	}
-//
-//	return tsMap, nil
 //}
 
 //=============================================================================
@@ -114,20 +94,14 @@ func GetTradingSystemsFull(tx *gorm.DB, filter map[string]any, offset int, limit
 
 //=============================================================================
 
-//func GetOrCreateTradingSystem(tx *gorm.DB, code string, ts *TradingSystem) (*TradingSystem, error) {
-//	res := tx.Where(&TradingSystem{StrategyCode: code}).FirstOrCreate(&ts)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	return ts, nil
-//}
+func AddTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
+	return tx.Create(ts).Error
+}
 
 //=============================================================================
 
-func AddTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
-	return tx.Create(ts).Error
+func UpdateTradingSystem(tx *gorm.DB, ts *TradingSystem) {
+	tx.Updates(ts)
 }
 
 //=============================================================================
