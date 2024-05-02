@@ -46,19 +46,30 @@ type Currency struct {
 
 //=============================================================================
 
+type Exchange struct {
+	Id         uint   `json:"id"`
+	CurrencyId uint   `json:"currencyId"`
+	Code       string `json:"code"`
+	Name       string `json:"name"`
+	Timezone   string `json:"timezone"`
+	Url        string `json:"url"`
+}
+
+//=============================================================================
+
 type Connection struct {
 	Common
-	Username              string `json:"username"`
-	Code                  string `json:"code"`
-	Name                  string `json:"name"`
-	SystemCode            string `json:"systemCode"`
-	SystemName            string `json:"systemName"`
-	SystemConfig          string `json:"systemConfig"`
-	ConnectionCode        string `json:"connectionCode"`
-	SupportsFeed          bool   `json:"supportsFeed"`
-	SupportsBroker        bool   `json:"supportsBroker"`
-	SupportsMultipleFeeds bool   `json:"supportsMultipleFeeds"`
-	SupportsInventory     bool   `json:"supportsInventory"`
+	Username             string `json:"username"`
+	Code                 string `json:"code"`
+	Name                 string `json:"name"`
+	SystemCode           string `json:"systemCode"`
+	SystemName           string `json:"systemName"`
+	SystemConfig         string `json:"systemConfig"`
+	ConnectionCode       string `json:"connectionCode"`
+	SupportsData         bool   `json:"supportsData"`
+	SupportsBroker       bool   `json:"supportsBroker"`
+	SupportsMultipleData bool   `json:"supportsMultipleData"`
+	SupportsInventory    bool   `json:"supportsInventory"`
 }
 
 //=============================================================================
@@ -72,42 +83,43 @@ type Portfolio struct {
 
 //=============================================================================
 
-type ProductFeed struct {
+type ProductData struct {
 	Common
 	ConnectionId uint     `json:"connectionId"`
+	ExchangeId   uint     `json:"exchangeId"`
 	Username     string   `json:"username"`
 	Symbol       string   `json:"symbol"`
 	Name         string   `json:"name"`
-	PriceScale   int      `json:"priceScale"`
-	MinMovement  float32  `json:"minMovement"`
+	Increment    float64  `json:"increment"`
 	MarketType   string   `json:"marketType"`
 	ProductType  string   `json:"productType"`
-	Exchange     string   `json:"exchange"`
+	LocalClass   string   `json:"localClass"`
 }
 
 //=============================================================================
 
-
-type ProductFeedFull struct {
-	ProductFeed
+type ProductDataFull struct {
+	ProductData
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
+	SystemCode      string  `json:"systemCode,omitempty"`
+	ExchangeCode    string  `json:"exchangeCode,omitempty"`
 }
 
 //=============================================================================
 
 type ProductBroker struct {
 	Common
-	ConnectionId     uint       `json:"connectionId"`
-	Username         string     `json:"username"`
-	Symbol           string     `json:"symbol"`
-	Name             string     `json:"name"`
-	PointValue       float32    `json:"pointValue"`
-	CostPerTrade     float32    `json:"costPerTrade"`
-	MarginValue      float32    `json:"marginValue"`
-	CurrencyId       uint       `json:"currencyId"`
-	MarketType       string     `json:"marketType"`
-	ProductType      string     `json:"productType"`
-	Exchange         string     `json:"exchange"`
+	ConnectionId     uint     `json:"connectionId"`
+	ExchangeId       uint     `json:"exchangeId"`
+	Username         string   `json:"username"`
+	Symbol           string   `json:"symbol"`
+	Name             string   `json:"name"`
+	PointValue       float32  `json:"pointValue"`
+	CostPerTrade     float32  `json:"costPerTrade"`
+	MarginValue      float32  `json:"marginValue"`
+	MarketType       string   `json:"marketType"`
+	ProductType      string   `json:"productType"`
+	LocalClass       string   `json:"localClass"`
 }
 
 //=============================================================================
@@ -116,27 +128,30 @@ type ProductBrokerFull struct {
 	ProductBroker
 	CurrencyCode    string  `json:"currencyCode,omitempty"`
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
+	ExchangeCode    string  `json:"exchangeCode,omitempty"`
 }
 
 //=============================================================================
 
-type InstrumentFeed struct {
-	Id               uint      `json:"id" gorm:"primaryKey"`
-	ProductFeedId    uint       `json:"productFeedId"`
-	Symbol           string     `json:"symbol"`
-	Name             string     `json:"name"`
-	ExpirationDate   time.Time  `json:"expirationDate"`
-	IsContinuous     bool       `json:"isContinuous"`
+type InstrumentData struct {
+	Id               uint    `json:"id" gorm:"primaryKey"`
+	ProductDataId    uint    `json:"productDataId"`
+	ContractId       uint    `json:"contractId"`
+	Symbol           string  `json:"symbol"`
+	Name             string  `json:"name"`
+	ExpirationDate   int     `json:"expirationDate"`
+	IsContinuous     bool    `json:"isContinuous"`
 }
 
 //=============================================================================
 
 type InstrumentBroker struct {
-	Id               uint       `json:"id" gorm:"primaryKey"`
-	ProductBrokerId  uint       `json:"productBrokerId"`
-	Symbol           string     `json:"symbol"`
-	Name             string     `json:"name"`
-	ExpirationDate   time.Time  `json:"expirationDate"`
+	Id               uint    `json:"id" gorm:"primaryKey"`
+	ProductBrokerId  uint    `json:"productBrokerId"`
+	ContractId       uint    `json:"contractId"`
+	Symbol           string  `json:"symbol"`
+	Name             string  `json:"name"`
+	ExpirationDate   int     `json:"expirationDate"`
 }
 
 //=============================================================================
@@ -153,7 +168,7 @@ type TradingSession struct {
 type TradingSystem struct {
 	Common
 	PortfolioId       uint    `json:"portfolioId"`
-	ProductFeedId     uint    `json:"productFeedId"`
+	ProductDataId     uint    `json:"productDataId"`
 	ProductBrokerId   uint    `json:"productBrokerId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
 	Username          string  `json:"username"`
@@ -165,7 +180,7 @@ type TradingSystem struct {
 
 type TradingSystemFull struct {
 	TradingSystem
-	FeedSymbol     string `json:"feedSymbol,omitempty"`
+	DataSymbol     string `json:"dataSymbol,omitempty"`
 	BrokerSymbol   string `json:"brokerSymbol,omitempty"`
 	PortfolioName  string `json:"portfolioName,omitempty"`
 	TradingSession string `json:"tradingSession,omitempty"`
@@ -178,11 +193,12 @@ type TradingSystemFull struct {
 //=============================================================================
 
 func (Currency)         TableName() string { return "currency" }
+func (Exchange)         TableName() string { return "exchange" }
 func (Connection)       TableName() string { return "connection" }
 func (Portfolio)        TableName() string { return "portfolio" }
-func (ProductFeed)      TableName() string { return "product_feed" }
+func (ProductData)      TableName() string { return "product_data" }
 func (ProductBroker)    TableName() string { return "product_broker" }
-func (InstrumentFeed)   TableName() string { return "instrument_feed" }
+func (InstrumentData)   TableName() string { return "instrument_data" }
 func (InstrumentBroker) TableName() string { return "instrument_broker" }
 func (TradingSession)   TableName() string { return "trading_session" }
 func (TradingSystem)    TableName() string { return "trading_system" }

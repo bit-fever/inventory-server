@@ -80,17 +80,17 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 	}
 
 	var conn db.Connection
-	conn.Username              = c.Session.Username
-	conn.Code                  = cs.Code
-	conn.Name                  = cs.Name
-	conn.SystemCode            = cs.SystemCode
-	conn.SystemConfig          = cs.SystemConfig
+	conn.Username             = c.Session.Username
+	conn.Code                 = cs.Code
+	conn.Name                 = cs.Name
+	conn.SystemCode           = cs.SystemCode
+	conn.SystemConfig         = cs.SystemConfig
 
-	conn.SystemName            = sys.Name
-	conn.SupportsFeed          = sys.SupportsFeed
-	conn.SupportsBroker        = sys.SupportsBroker
-	conn.SupportsMultipleFeeds = sys.SupportsMultipleFeeds
-	conn.SupportsInventory     = sys.SupportsInventory
+	conn.SystemName           = sys.Name
+	conn.SupportsData         = sys.SupportsData
+	conn.SupportsBroker       = sys.SupportsBroker
+	conn.SupportsMultipleData = sys.SupportsMultipleData
+	conn.SupportsInventory    = sys.SupportsInventory
 
 	err = db.AddConnection(tx, &conn)
 

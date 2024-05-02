@@ -31,6 +31,19 @@ import (
 
 //=============================================================================
 
+func GetCurrencies(tx *gorm.DB) (*[]Currency, error) {
+	var list []Currency
+	res := tx.Find(&list)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	return &list, nil
+}
+
+//=============================================================================
+
 func GetCurrencyById(tx *gorm.DB, id uint) (*Currency, error) {
 	var list []Currency
 	res := tx.Find(&list, id)

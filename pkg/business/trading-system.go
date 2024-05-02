@@ -56,7 +56,7 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.WorkspaceCode    = tss.WorkspaceCode
 	ts.Name             = tss.Name
 	ts.PortfolioId      = tss.PortfolioId
-	ts.ProductFeedId    = tss.ProductFeedId
+	ts.ProductDataId    = tss.ProductDataId
 	ts.ProductBrokerId  = tss.ProductBrokerId
 	ts.TradingSessionId = tss.TradingSessionId
 
@@ -78,28 +78,28 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 
 //=============================================================================
 
-func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db.TradingSystem, error) {
-	c.Log.Info("UpdateTradingSystem: Updating a trading system", "id", tss.Id, "name", tss.Name)
+func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSystemSpec) (*db.TradingSystem, error) {
+	c.Log.Info("UpdateTradingSystem: Updating a trading system", "id", id, "name", tss.Name)
 
-	ts, err := db.GetTradingSystemById(tx, tss.Id)
+	ts, err := db.GetTradingSystemById(tx, id)
 	if err != nil {
 		c.Log.Error("UpdateTradingSystem: Could not retrieve trading system", "error", err.Error())
 		return nil, err
 	}
 	if ts == nil {
-		c.Log.Error("UpdateTradingSystem: Trading system was not found", "id", tss.Id)
-		return nil, req.NewNotFoundError("Trading system was not found: %v", tss.Id)
+		c.Log.Error("UpdateTradingSystem: Trading system was not found", "id", id)
+		return nil, req.NewNotFoundError("Trading system was not found: %v", id)
 	}
 
 	if ts.Username != c.Session.Username {
-		c.Log.Error("UpdateTradingSystem: Trading system not owned by user", "id", tss.Id)
-		return nil, req.NewForbiddenError("Trading system was owned by user: %v", tss.Id)
+		c.Log.Error("UpdateTradingSystem: Trading system not owned by user", "id", id)
+		return nil, req.NewForbiddenError("Trading system is not owned by user: %v", id)
 	}
 
 	ts.WorkspaceCode    = tss.WorkspaceCode
 	ts.Name             = tss.Name
 	ts.PortfolioId      = tss.PortfolioId
-	ts.ProductFeedId    = tss.ProductFeedId
+	ts.ProductDataId    = tss.ProductDataId
 	ts.ProductBrokerId  = tss.ProductBrokerId
 	ts.TradingSessionId = tss.TradingSessionId
 
@@ -127,7 +127,13 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		return err
 	}
 
-	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
+	ex, err := db.GetExchangeById(tx, pb.ExchangeId)
+	if err != nil {
+		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve exchange", "error", err.Error())
+		return err
+	}
+
+	cu, err := db.GetCurrencyById(tx, ex.CurrencyId)
 	if err != nil {
 		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve currency", "error", err.Error())
 		return err

@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2024 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,29 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package db
+package service
+
+import (
+	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/business"
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"gorm.io/gorm"
+)
 
 //=============================================================================
 
-//func GetTradingFilterById(tx *gorm.DB, id uint) (*TradingFilter, error) {
-//	var list []TradingFilter
-//	res := tx.Find(&list, id)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	if len(list) == 1 {
-//		return &list[0], nil
-//	}
-//
-//	return nil, nil
-//}
+func getExchanges(c *auth.Context) {
+	err := db.RunInTransaction(func(tx *gorm.DB) error {
+		list, err := business.GetExchanges(tx)
+
+		if err != nil {
+			return err
+		}
+
+		return c.ReturnList(list, 0, len(*list), len(*list))
+	})
+
+	c.ReturnError(err)
+}
 
 //=============================================================================

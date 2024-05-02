@@ -57,6 +57,7 @@ func getProductBrokers(c *auth.Context) {
 }
 
 //=============================================================================
+
 func getProductBrokerById(c *auth.Context) {
 	id, err := c.GetIdFromUrl()
 
@@ -72,6 +73,52 @@ func getProductBrokerById(c *auth.Context) {
 				}
 
 				return c.ReturnObject(&list)
+			})
+		}
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func addProductBroker(c *auth.Context) {
+	var pds business.ProductBrokerSpec
+	err := c.BindParamsFromBody(&pds)
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			ts, err := business.AddProductBroker(tx, c, &pds)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(ts)
+		})
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func updateProductBroker(c *auth.Context) {
+	var pds business.ProductBrokerSpec
+	err := c.BindParamsFromBody(&pds)
+
+	if err == nil {
+		id,err := c.GetIdFromUrl()
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				ts, err := business.UpdateProductBroker(tx, c, id, &pds)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnObject(ts)
 			})
 		}
 	}

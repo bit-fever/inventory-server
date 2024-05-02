@@ -74,9 +74,9 @@ func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (
 		return nil, err
 	}
 
-	//--- Get currency
+	//--- Get exchange
 
-	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
+	ex, err := db.GetExchangeById(tx, pb.ExchangeId)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +94,116 @@ func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (
 	pbe := ProductBrokerExt{
 		ProductBroker: *pb,
 		Connection:    *co,
-		Currency:      *cu,
+		Exchange:      *ex,
 		Instruments:   *instruments,
 	}
 
 	return &pbe, nil
 }
+
+//=============================================================================
+
+func AddProductBroker(tx *gorm.DB, c *auth.Context, pbs *ProductBrokerSpec) (*db.ProductBroker, error) {
+	c.Log.Info("AddProductBroker: Adding a new product for broker", "symbol", pbs.Symbol, "name", pbs.Name)
+
+	var pb db.ProductBroker
+	pb.ConnectionId = pbs.ConnectionId
+	pb.ExchangeId   = pbs.ExchangeId
+	pb.Username     = c.Session.Username
+	pb.Symbol       = pbs.Symbol
+	pb.Name         = pbs.Name
+	pb.PointValue   = pbs.PointValue
+	pb.CostPerTrade = pbs.CostPerTrade
+	pb.MarginValue  = pbs.MarginValue
+	pb.MarketType   = pbs.MarketType
+	pb.ProductType  = pbs.ProductType
+	pb.LocalClass   = pbs.LocalClass
+
+	err := db.AddProductBroker(tx, &pb)
+
+	if err != nil {
+		c.Log.Error("AddProductBroker: Could not add a new product for broker", "error", err.Error())
+		return nil, err
+	}
+
+	//err = sendChangeMessage(tx, c, &pd, msg.TypeCreate)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	c.Log.Info("AddProductBroker: Product for broker added", "symbol", pb.Symbol, "id", pb.Id)
+	return &pb, err
+}
+
+//=============================================================================
+
+func UpdateProductBroker(tx *gorm.DB, c *auth.Context, id uint, pbs *ProductBrokerSpec) (*db.ProductBroker, error) {
+	c.Log.Info("UpdateProductBroker: Updating a product for broker", "id", id, "name", pbs.Name)
+
+	pb, err := db.GetProductBrokerById(tx, id)
+	if err != nil {
+		c.Log.Error("UpdateProductBroker: Could not retrieve product for broker", "error", err.Error())
+		return nil, err
+	}
+	if pb == nil {
+		c.Log.Error("UpdateProductBroker: Product for broker was not found", "id", id)
+		return nil, req.NewNotFoundError("Product for broker was not found: %v", id)
+	}
+
+	if pb.Username != c.Session.Username {
+		c.Log.Error("UpdateProductBroker: Product for broker not owned by user", "id", id)
+		return nil, req.NewForbiddenError("Product for broker is not owned by user: %v", id)
+	}
+
+	pb.ExchangeId  = pbs.ExchangeId
+	pb.Symbol      = pbs.Symbol
+	pb.Name        = pbs.Name
+	pb.PointValue  = pbs.PointValue
+	pb.CostPerTrade= pbs.CostPerTrade
+	pb.MarginValue = pbs.MarginValue
+	pb.MarketType  = pbs.MarketType
+	pb.ProductType = pbs.ProductType
+	pb.LocalClass  = pbs.LocalClass
+
+	db.UpdateProductBroker(tx, pb)
+
+	//err = sendChangeMessage(tx, c, ts, msg.TypeUpdate)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	c.Log.Info("UpdateProductBroker: Product for broker updated", "id", pb.Id, "name", pb.Name)
+	return pb, err
+}
+
+//=============================================================================
+//===
+//=== Private functions
+//===
+//=============================================================================
+
+//func sendChangeMessageX(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
+//	pb, err := db.GetProductBrokerById(tx, ts.ProductBrokerId)
+//	if err != nil {
+//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve product broker", "error", err.Error())
+//		return err
+//	}
+//
+//	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
+//	if err != nil {
+//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve currency", "error", err.Error())
+//		return err
+//	}
+//
+//	tsm := TradingSystemMessage{*ts, *pb, *cu}
+//	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceTradingSystem, &tsm)
+//
+//	if err != nil {
+//		c.Log.Error("[Add|Update]TradingSystem: Could not publish the update message", "error", err.Error())
+//		return err
+//	}
+//
+//	return nil
+//}
 
 //=============================================================================

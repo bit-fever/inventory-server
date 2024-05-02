@@ -46,10 +46,11 @@ func GetProductBrokers(tx *gorm.DB, filter map[string]any, offset int, limit int
 
 func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
 	var list []ProductBrokerFull
-	query :=	"SELECT pb.*, m.code as currency_code, c.code as connection_code " +
+	query :=	"SELECT pb.*, m.code as currency_code, c.code as connection_code, e.code as exchange_code " +
 				"FROM product_broker pb " +
 				"LEFT JOIN connection c on pb.connection_id = c.id " +
-				"LEFT JOIN currency   m on pb.currency_id   = m.id"
+				"LEFT JOIN exchange   e on pb.exchange_id   = e.id "  +
+				"LEFT JOIN currency   m on  e.currency_id   = m.id "
 
 	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
 
@@ -79,14 +80,14 @@ func GetProductBrokerById(tx *gorm.DB, id uint) (*ProductBroker, error) {
 
 //=============================================================================
 
-//func GetOrCreateInstrument(tx *gorm.DB, ticker string, i *Instrument) (*Instrument, error) {
-//	res := tx.Where(&Instrument{Ticker: ticker}).FirstOrCreate(i)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	return i, nil
-//}
+func AddProductBroker(tx *gorm.DB, pb *ProductBroker) error {
+	return tx.Create(pb).Error
+}
+
+//=============================================================================
+
+func UpdateProductBroker(tx *gorm.DB, pb *ProductBroker) {
+	tx.Updates(pb)
+}
 
 //=============================================================================

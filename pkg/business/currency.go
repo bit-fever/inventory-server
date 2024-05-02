@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2024 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,17 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package platform
+package business
+
+import (
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"gorm.io/gorm"
+)
 
 //=============================================================================
 
-type SystemList struct {
-	Offset   int      `json:"offset"`
-	Limit    int      `json:"limit"`
-	Overflow bool     `json:"overflow"`
-	Result   []System `json:"result"`
-}
-
-//=============================================================================
-
-type System struct {
-	Code                  string `json:"code"`
-	Name                  string `json:"name"`
-	SupportsData          bool   `json:"supportsData"`
-	SupportsBroker        bool   `json:"supportsBroker"`
-	SupportsMultipleData  bool   `json:"supportsMultipleData"`
-	SupportsInventory     bool   `json:"supportsInventory"`
+func GetCurrencies(tx *gorm.DB) (*[]db.Currency, error) {
+	return db.GetCurrencies(tx)
 }
 
 //=============================================================================

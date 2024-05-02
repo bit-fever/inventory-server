@@ -38,13 +38,40 @@ type ConnectionSpec struct {
 //=============================================================================
 
 type TradingSystemSpec struct {
-	Id               uint   `json:"id"`
 	PortfolioId      uint   `json:"portfolioId"       binding:"required"`
-	ProductFeedId    uint   `json:"productFeedId"     binding:"required"`
+	ProductDataId    uint   `json:"productDataId"     binding:"required"`
 	ProductBrokerId  uint   `json:"productBrokerId"   binding:"required"`
 	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
 	WorkspaceCode    string `json:"workspaceCode"     binding:"required"`
 	Name             string `json:"name"              binding:"required"`
+}
+
+//=============================================================================
+
+type ProductDataSpec struct {
+	ConnectionId     uint    `json:"connectionId"   binding:"required"`
+	ExchangeId       uint    `json:"exchangeId"     binding:"required"`
+	Symbol           string  `json:"symbol"         binding:"required"`
+	Name             string  `json:"name"           binding:"required"`
+	Increment        float64 `json:"increment"      binding:"required,min=0,max=1"`
+	MarketType       string  `json:"marketType"     binding:"required"`
+	ProductType      string  `json:"productType"    binding:"required"`
+	LocalClass       string  `json:"localClass"     binding:"required"`
+}
+
+//=============================================================================
+
+type ProductBrokerSpec struct {
+	ConnectionId     uint    `json:"connectionId"   binding:"required"`
+	ExchangeId       uint    `json:"exchangeId"     binding:"required"`
+	Symbol           string  `json:"symbol"         binding:"required"`
+	Name             string  `json:"name"           binding:"required"`
+	PointValue       float32 `json:"pointValue"     binding:"required,min=0"`
+	CostPerTrade     float32 `json:"costPerTrade"   binding:"required,min=0"`
+	MarginValue      float32 `json:"marginValue"    binding:"required,min=0"`
+	MarketType       string  `json:"marketType"     binding:"required"`
+	ProductType      string  `json:"productType"    binding:"required"`
+	LocalClass       string  `json:"localClass"     binding:"required"`
 }
 
 //=============================================================================
@@ -73,23 +100,23 @@ func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystemFull) {
 
 //=============================================================================
 //===
-//=== ProductBroker & ProductFeed composite structs
+//=== ProductBroker & ProductData composite structs
 //===
 //=============================================================================
 
 type ProductBrokerExt struct {
 	db.ProductBroker
 	Connection  db.Connection         `json:"connection"`
-	Currency    db.Currency           `json:"currency"`
+	Exchange    db.Exchange           `json:"exchange"`
 	Instruments []db.InstrumentBroker `json:"instruments,omitempty"`
 }
 
 //=============================================================================
 
-type ProductFeedExt struct {
-	db.ProductFeed
+type ProductDataExt struct {
+	db.ProductData
 	Connection  db.Connection       `json:"connection"`
-	Instruments []db.InstrumentFeed `json:"instruments,omitempty"`
+	Instruments []db.InstrumentData `json:"instruments,omitempty"`
 }
 
 //=============================================================================

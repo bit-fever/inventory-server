@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2024 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,38 +22,41 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package service
+package db
 
 import (
-	"github.com/bit-fever/core/auth"
-	"github.com/bit-fever/inventory-server/pkg/business"
-	"github.com/bit-fever/inventory-server/pkg/db"
+	"github.com/bit-fever/core/req"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func getProductFeeds(c *auth.Context) {
-	filter := map[string]any{}
-	offset, limit, err := c.GetPagingParams()
+func GetExchanges(tx *gorm.DB) (*[]Exchange, error) {
+	var list []Exchange
+	res := tx.Find(&list)
 
-	if err == nil {
-		details, err := c.GetParamAsBool("details", false)
-
-		if err == nil {
-			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				list, err := business.GetProductFeeds(tx, c, filter, offset, limit, details)
-
-				if err != nil {
-					return err
-				}
-
-				return c.ReturnList(list, offset, limit, len(*list))
-			})
-		}
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
 	}
 
-	c.ReturnError(err)
+	return &list, nil
+}
+
+//=============================================================================
+
+func GetExchangeById(tx *gorm.DB, id uint) (*Exchange, error) {
+	var list []Exchange
+	res := tx.Find(&list, id)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
 }
 
 //=============================================================================

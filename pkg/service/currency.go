@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2024 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,71 +33,16 @@ import (
 
 //=============================================================================
 
-func getTradingSystems(c *auth.Context) {
-	filter := map[string]any{}
-	offset, limit, err := c.GetPagingParams()
+func getCurrencies(c *auth.Context) {
+	err := db.RunInTransaction(func(tx *gorm.DB) error {
+		list, err := business.GetCurrencies(tx)
 
-	if err == nil {
-		details, err := c.GetParamAsBool("details", false)
-
-		if err == nil {
-			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				list, err := business.GetTradingSystems(tx, c, filter, offset, limit, details)
-
-				if err != nil {
-					return err
-				}
-
-				return c.ReturnList(list, offset, limit, len(*list))
-			})
+		if err != nil {
+			return err
 		}
-	}
 
-	c.ReturnError(err)
-}
-
-//=============================================================================
-
-func addTradingSystem(c *auth.Context) {
-	var tss business.TradingSystemSpec
-	err := c.BindParamsFromBody(&tss)
-
-	if err == nil {
-		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			ts, err := business.AddTradingSystem(tx, c, &tss)
-
-			if err != nil {
-				return err
-			}
-
-			return c.ReturnObject(ts)
-		})
-	}
-
-	c.ReturnError(err)
-}
-
-//=============================================================================
-
-func updateTradingSystem(c *auth.Context) {
-	var tss business.TradingSystemSpec
-	err := c.BindParamsFromBody(&tss)
-
-	if err == nil {
-		id,err := c.GetIdFromUrl()
-
-		if err == nil {
-			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				ts, err := business.UpdateTradingSystem(tx, c, id, &tss)
-
-				if err != nil {
-					return err
-				}
-
-				return c.ReturnObject(ts)
-			})
-		}
-	}
+		return c.ReturnList(list, 0, len(*list), len(*list))
+	})
 
 	c.ReturnError(err)
 }

@@ -22,26 +22,84 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package business
+package service
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/inventory-server/pkg/business"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func GetProductFeeds(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.ProductFeedFull, error) {
-	if ! c.Session.IsAdmin() {
-		filter["username"] = c.Session.Username
+func getProductData(c *auth.Context) {
+	filter := map[string]any{}
+	offset, limit, err := c.GetPagingParams()
+
+	if err == nil {
+		details, err := c.GetParamAsBool("details", false)
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				list, err := business.GetProductData(tx, c, filter, offset, limit, details)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnList(list, offset, limit, len(*list))
+			})
+		}
 	}
 
-	if details {
-		return db.GetProductFeedsFull(tx, filter, offset, limit)
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func addProductData(c *auth.Context) {
+	var pds business.ProductDataSpec
+	err := c.BindParamsFromBody(&pds)
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			ts, err := business.AddProductData(tx, c, &pds)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(ts)
+		})
 	}
 
-	return db.GetProductFeeds(tx, filter, offset, limit)
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func updateProductData(c *auth.Context) {
+	var pds business.ProductDataSpec
+	err := c.BindParamsFromBody(&pds)
+
+	if err == nil {
+		id,err := c.GetIdFromUrl()
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				ts, err := business.UpdateProductData(tx, c, id, &pds)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnObject(ts)
+			})
+		}
+	}
+
+	c.ReturnError(err)
 }
 
 //=============================================================================

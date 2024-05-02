@@ -31,8 +31,8 @@ import (
 
 //=============================================================================
 
-func GetProductFeeds(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductFeedFull, error) {
-	var list []ProductFeedFull
+func GetProductData(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductDataFull, error) {
+	var list []ProductDataFull
 	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
 
 	if res.Error != nil {
@@ -44,11 +44,12 @@ func GetProductFeeds(tx *gorm.DB, filter map[string]any, offset int, limit int) 
 
 //=============================================================================
 
-func GetProductFeedsFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductFeedFull, error) {
-	var list []ProductFeedFull
-	query :=	"SELECT pf.*, c.code as connection_code " +
-				"FROM product_feed pf " +
-				"LEFT JOIN connection c on pf.connection_id = c.id"
+func GetProductDataFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductDataFull, error) {
+	var list []ProductDataFull
+	query :=	"SELECT pd.*, c.code as connection_code, c.system_code as system_code, e.code as exchange_code " +
+				"FROM product_data pd " +
+				"LEFT JOIN connection c on pd.connection_id = c.id "+
+				"LEFT JOIN exchange   e on pd.exchange_id   = e.id"
 
 	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
 
@@ -57,6 +58,35 @@ func GetProductFeedsFull(tx *gorm.DB, filter map[string]any, offset int, limit i
 	}
 
 	return &list, nil
+}
+
+//=============================================================================
+
+func GetProductDataById(tx *gorm.DB, id uint) (*ProductData, error) {
+	var list []ProductData
+	res := tx.Find(&list, id)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
+
+//=============================================================================
+
+func AddProductData(tx *gorm.DB, ts *ProductData) error {
+	return tx.Create(ts).Error
+}
+
+//=============================================================================
+
+func UpdateProductData(tx *gorm.DB, ts *ProductData) {
+	tx.Updates(ts)
 }
 
 //=============================================================================
