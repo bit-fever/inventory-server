@@ -136,10 +136,9 @@ type ProductBrokerFull struct {
 type InstrumentData struct {
 	Id               uint    `json:"id" gorm:"primaryKey"`
 	ProductDataId    uint    `json:"productDataId"`
-	ContractId       uint    `json:"contractId"`
 	Symbol           string  `json:"symbol"`
 	Name             string  `json:"name"`
-	ExpirationDate   int     `json:"expirationDate"`
+	ExpirationDate   int     `json:"expirationDate,omitempty"`
 	IsContinuous     bool    `json:"isContinuous"`
 }
 
@@ -148,7 +147,6 @@ type InstrumentData struct {
 type InstrumentBroker struct {
 	Id               uint    `json:"id" gorm:"primaryKey"`
 	ProductBrokerId  uint    `json:"productBrokerId"`
-	ContractId       uint    `json:"contractId"`
 	Symbol           string  `json:"symbol"`
 	Name             string  `json:"name"`
 	ExpirationDate   int     `json:"expirationDate"`

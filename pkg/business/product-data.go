@@ -47,6 +47,48 @@ func GetProductData(tx *gorm.DB, c *auth.Context, filter map[string]any, offset 
 
 //=============================================================================
 
+func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*ProductDataExt, error) {
+	c.Log.Info("GetProductDataById: Getting a product for data", "id", id)
+
+	pd, err := db.GetProductDataById(tx, id)
+	if err != nil {
+		c.Log.Error("GetProductDataById: Could not retrieve product for data", "error", err.Error())
+		return nil, err
+	}
+	if pd == nil {
+		c.Log.Error("GetProductDataById: Product for data was not found", "id", id)
+		return nil, req.NewNotFoundError("Product for data was not found: %v", id)
+	}
+
+	if pd.Username != c.Session.Username {
+		c.Log.Error("GetProductDataById: Product for data not owned by user", "id", id)
+		return nil, req.NewForbiddenError("Product for data is not owned by user: %v", id)
+	}
+
+	pe := &ProductDataExt{ ProductData: *pd }
+
+	if details {
+		conn, err := db.GetConnectionById(tx, pd.ConnectionId)
+		if err != nil {
+			c.Log.Error("GetProductDataById: Could not retrieve connection", "error", err.Error())
+			return nil, err
+		}
+
+		exc, err  := db.GetExchangeById(tx, pd.ExchangeId)
+		if err != nil {
+			c.Log.Error("GetProductDataById: Could not retrieve exchange", "error", err.Error())
+			return nil, err
+		}
+
+		pe.Connection = *conn
+		pe.Exchange   = *exc
+	}
+
+	return pe, nil
+}
+
+//=============================================================================
+
 func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.ProductData, error) {
 	c.Log.Info("AddProductData: Adding a new product for data", "symbol", pds.Symbol, "name", pds.Name)
 
@@ -114,6 +156,12 @@ func UpdateProductData(tx *gorm.DB, c *auth.Context, id uint, pds *ProductDataSp
 
 	c.Log.Info("UpdateProductData: Product for data updated", "id", pd.Id, "name", pd.Name)
 	return pd, err
+}
+
+//=============================================================================
+
+func GetInstrumentDataByProductId(tx *gorm.DB, c *auth.Context, id uint)(*[]db.InstrumentData, error) {
+	return db.GetInstrumentsByDataId(tx, id)
 }
 
 //=============================================================================

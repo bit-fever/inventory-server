@@ -115,8 +115,8 @@ type ProductBrokerExt struct {
 
 type ProductDataExt struct {
 	db.ProductData
-	Connection  db.Connection       `json:"connection"`
-	Instruments []db.InstrumentData `json:"instruments,omitempty"`
+	Connection  db.Connection `json:"connection,omitempty"`
+	Exchange    db.Exchange   `json:"exchange,omitempty"`
 }
 
 //=============================================================================

@@ -58,6 +58,30 @@ func getProductData(c *auth.Context) {
 
 //=============================================================================
 
+func getProductDataById(c *auth.Context) {
+	id, err := c.GetIdFromUrl()
+
+	if err == nil {
+		details, err := c.GetParamAsBool("details", false)
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				pd, err := business.GetProductDataById(tx, c, id, details)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnObject(pd)
+			})
+		}
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
 func addProductData(c *auth.Context) {
 	var pds business.ProductDataSpec
 	err := c.BindParamsFromBody(&pds)
@@ -97,6 +121,26 @@ func updateProductData(c *auth.Context) {
 				return c.ReturnObject(ts)
 			})
 		}
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================
+
+func getInstrumentDataByProductId(c *auth.Context) {
+	pdId, err := c.GetIdFromUrl()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			list, err := business.GetInstrumentDataByProductId(tx, c, pdId)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnList(list, 0, len(*list), len(*list))
+		})
 	}
 
 	c.ReturnError(err)
