@@ -65,7 +65,7 @@ type Connection struct {
 	SystemCode           string `json:"systemCode"`
 	SystemName           string `json:"systemName"`
 	SystemConfig         string `json:"systemConfig"`
-	ConnectionCode       string `json:"connectionCode"`
+	InstanceCode         string `json:"instanceCode"`
 	SupportsData         bool   `json:"supportsData"`
 	SupportsBroker       bool   `json:"supportsBroker"`
 	SupportsMultipleData bool   `json:"supportsMultipleData"`
@@ -93,7 +93,6 @@ type ProductData struct {
 	Increment    float64  `json:"increment"`
 	MarketType   string   `json:"marketType"`
 	ProductType  string   `json:"productType"`
-	LocalClass   string   `json:"localClass"`
 }
 
 //=============================================================================
@@ -119,7 +118,6 @@ type ProductBroker struct {
 	MarginValue      float32  `json:"marginValue"`
 	MarketType       string   `json:"marketType"`
 	ProductType      string   `json:"productType"`
-	LocalClass       string   `json:"localClass"`
 }
 
 //=============================================================================
@@ -129,17 +127,6 @@ type ProductBrokerFull struct {
 	CurrencyCode    string  `json:"currencyCode,omitempty"`
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
 	ExchangeCode    string  `json:"exchangeCode,omitempty"`
-}
-
-//=============================================================================
-
-type InstrumentData struct {
-	Id               uint    `json:"id" gorm:"primaryKey"`
-	ProductDataId    uint    `json:"productDataId"`
-	Symbol           string  `json:"symbol"`
-	Name             string  `json:"name"`
-	ExpirationDate   int     `json:"expirationDate,omitempty"`
-	IsContinuous     bool    `json:"isContinuous"`
 }
 
 //=============================================================================
@@ -196,7 +183,6 @@ func (Connection)       TableName() string { return "connection" }
 func (Portfolio)        TableName() string { return "portfolio" }
 func (ProductData)      TableName() string { return "product_data" }
 func (ProductBroker)    TableName() string { return "product_broker" }
-func (InstrumentData)   TableName() string { return "instrument_data" }
 func (InstrumentBroker) TableName() string { return "instrument_broker" }
 func (TradingSession)   TableName() string { return "trading_session" }
 func (TradingSystem)    TableName() string { return "trading_system" }

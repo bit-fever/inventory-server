@@ -127,23 +127,3 @@ func updateProductData(c *auth.Context) {
 }
 
 //=============================================================================
-
-func getInstrumentDataByProductId(c *auth.Context) {
-	pdId, err := c.GetIdFromUrl()
-
-	if err == nil {
-		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			list, err := business.GetInstrumentDataByProductId(tx, c, pdId)
-
-			if err != nil {
-				return err
-			}
-
-			return c.ReturnList(list, 0, len(*list), len(*list))
-		})
-	}
-
-	c.ReturnError(err)
-}
-
-//=============================================================================

@@ -48,7 +48,6 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 	router.POST("/api/inventory/v1/product-data",                 ctrl.Secure(addProductData,               roles.Admin_User_Service))
 	router.GET ("/api/inventory/v1/product-data/:id",             ctrl.Secure(getProductDataById,           roles.Admin_User_Service))
 	router.PUT ("/api/inventory/v1/product-data/:id",             ctrl.Secure(updateProductData,            roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-data/:id/instruments", ctrl.Secure(getInstrumentDataByProductId, roles.Admin_User_Service))
 
 	router.GET ("/api/inventory/v1/product-brokers",              ctrl.Secure(getProductBrokers,            roles.Admin_User_Service))
 	router.POST("/api/inventory/v1/product-brokers",              ctrl.Secure(addProductBroker,             roles.Admin_User_Service))

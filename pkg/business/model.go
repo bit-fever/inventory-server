@@ -49,29 +49,27 @@ type TradingSystemSpec struct {
 //=============================================================================
 
 type ProductDataSpec struct {
-	ConnectionId     uint    `json:"connectionId"   binding:"required"`
-	ExchangeId       uint    `json:"exchangeId"     binding:"required"`
-	Symbol           string  `json:"symbol"         binding:"required"`
-	Name             string  `json:"name"           binding:"required"`
-	Increment        float64 `json:"increment"      binding:"required,min=0,max=1"`
-	MarketType       string  `json:"marketType"     binding:"required"`
-	ProductType      string  `json:"productType"    binding:"required"`
-	LocalClass       string  `json:"localClass"     binding:"required"`
+	ConnectionId uint    `json:"connectionId"   binding:"required"`
+	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
+	Symbol       string  `json:"symbol"         binding:"required"`
+	Name         string  `json:"name"           binding:"required"`
+	Increment    float64 `json:"increment"      binding:"required,min=0,max=1"`
+	MarketType   string  `json:"marketType"     binding:"required"`
+	ProductType  string  `json:"productType"    binding:"required"`
 }
 
 //=============================================================================
 
 type ProductBrokerSpec struct {
-	ConnectionId     uint    `json:"connectionId"   binding:"required"`
-	ExchangeId       uint    `json:"exchangeId"     binding:"required"`
-	Symbol           string  `json:"symbol"         binding:"required"`
-	Name             string  `json:"name"           binding:"required"`
-	PointValue       float32 `json:"pointValue"     binding:"required,min=0"`
-	CostPerTrade     float32 `json:"costPerTrade"   binding:"required,min=0"`
-	MarginValue      float32 `json:"marginValue"    binding:"required,min=0"`
-	MarketType       string  `json:"marketType"     binding:"required"`
-	ProductType      string  `json:"productType"    binding:"required"`
-	LocalClass       string  `json:"localClass"     binding:"required"`
+	ConnectionId uint    `json:"connectionId"   binding:"required"`
+	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
+	Symbol       string  `json:"symbol"         binding:"required"`
+	Name         string  `json:"name"           binding:"required"`
+	PointValue   float32 `json:"pointValue"     binding:"required,min=0"`
+	CostPerTrade float32 `json:"costPerTrade"   binding:"required,min=0"`
+	MarginValue  float32 `json:"marginValue"    binding:"required,min=0"`
+	MarketType   string  `json:"marketType"     binding:"required"`
+	ProductType  string  `json:"productType"    binding:"required"`
 }
 
 //=============================================================================
@@ -115,8 +113,8 @@ type ProductBrokerExt struct {
 
 type ProductDataExt struct {
 	db.ProductData
-	Connection  db.Connection `json:"connection,omitempty"`
-	Exchange    db.Exchange   `json:"exchange,omitempty"`
+	Connection  db.Connection  `json:"connection,omitempty"`
+	Exchange    db.Exchange    `json:"exchange,omitempty"`
 }
 
 //=============================================================================
@@ -129,6 +127,22 @@ type TradingSystemMessage struct {
 	TradingSystem db.TradingSystem `json:"tradingSystem"`
 	ProductBroker db.ProductBroker `json:"productBroker"`
 	Currency      db.Currency      `json:"currency"`
+}
+
+//=============================================================================
+
+type ProductDataMessage struct {
+	ProductData db.ProductData `json:"productData"`
+	Connection  db.Connection  `json:"connection"`
+	Exchange    db.Exchange    `json:"exchange"`
+}
+
+//=============================================================================
+
+type ProductBrokerMessage struct {
+	ProductBroker db.ProductBroker `json:"productBroker"`
+	Connection    db.Connection    `json:"connection"`
+	Exchange      db.Exchange      `json:"exchange"`
 }
 
 //=============================================================================

@@ -26,6 +26,7 @@ package business
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/core/req"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
@@ -48,29 +49,18 @@ func GetProductBrokers(tx *gorm.DB, c *auth.Context, filter map[string]any, offs
 //=============================================================================
 
 func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*ProductBrokerExt, error) {
+	c.Log.Info("GetProductBrokerById: Getting a product for broker", "id", id)
 
-	//--- Get product broker
-
-	pb, err := db.GetProductBrokerById(tx, id)
+	pb, err := getProductBrokerAndCheckAccess(tx, c, id, "GetProductBrokerById")
 	if err != nil {
 		return nil, err
-	}
-	if pb == nil {
-		return nil, req.NewNotFoundError("Product broker not found: %v", id)
-	}
-
-	//--- Check access
-
-	if ! c.Session.IsAdmin() {
-		if pb.Username != c.Session.Username {
-			return nil, req.NewForbiddenError("Product broker not owned by user: %v", id)
-		}
 	}
 
 	//--- Get connection
 
-	co, err := db.GetConnectionById(tx, pb.ConnectionId)
+	conn, err := db.GetConnectionById(tx, pb.ConnectionId)
 	if err != nil {
+		c.Log.Error("GetProductBrokerById: Could not retrieve connection", "error", err.Error())
 		return nil, err
 	}
 
@@ -78,6 +68,7 @@ func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (
 
 	ex, err := db.GetExchangeById(tx, pb.ExchangeId)
 	if err != nil {
+		c.Log.Error("GetProductBrokerById: Could not retrieve exchange", "error", err.Error())
 		return nil, err
 	}
 
@@ -93,7 +84,7 @@ func GetProductBrokerById(tx *gorm.DB, c *auth.Context, id uint, details bool) (
 
 	pbe := ProductBrokerExt{
 		ProductBroker: *pb,
-		Connection:    *co,
+		Connection:    *conn,
 		Exchange:      *ex,
 		Instruments:   *instruments,
 	}
@@ -117,7 +108,6 @@ func AddProductBroker(tx *gorm.DB, c *auth.Context, pbs *ProductBrokerSpec) (*db
 	pb.MarginValue  = pbs.MarginValue
 	pb.MarketType   = pbs.MarketType
 	pb.ProductType  = pbs.ProductType
-	pb.LocalClass   = pbs.LocalClass
 
 	err := db.AddProductBroker(tx, &pb)
 
@@ -126,10 +116,10 @@ func AddProductBroker(tx *gorm.DB, c *auth.Context, pbs *ProductBrokerSpec) (*db
 		return nil, err
 	}
 
-	//err = sendChangeMessage(tx, c, &pd, msg.TypeCreate)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = sendProductBrokerChangeMessage(tx, c, &pb, msg.TypeUpdate)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Log.Info("AddProductBroker: Product for broker added", "symbol", pb.Symbol, "id", pb.Id)
 	return &pb, err
@@ -140,19 +130,9 @@ func AddProductBroker(tx *gorm.DB, c *auth.Context, pbs *ProductBrokerSpec) (*db
 func UpdateProductBroker(tx *gorm.DB, c *auth.Context, id uint, pbs *ProductBrokerSpec) (*db.ProductBroker, error) {
 	c.Log.Info("UpdateProductBroker: Updating a product for broker", "id", id, "name", pbs.Name)
 
-	pb, err := db.GetProductBrokerById(tx, id)
+	pb, err := getProductBrokerAndCheckAccess(tx, c, id, "UpdateProductBroker")
 	if err != nil {
-		c.Log.Error("UpdateProductBroker: Could not retrieve product for broker", "error", err.Error())
 		return nil, err
-	}
-	if pb == nil {
-		c.Log.Error("UpdateProductBroker: Product for broker was not found", "id", id)
-		return nil, req.NewNotFoundError("Product for broker was not found: %v", id)
-	}
-
-	if pb.Username != c.Session.Username {
-		c.Log.Error("UpdateProductBroker: Product for broker not owned by user", "id", id)
-		return nil, req.NewForbiddenError("Product for broker is not owned by user: %v", id)
 	}
 
 	pb.ExchangeId  = pbs.ExchangeId
@@ -163,14 +143,13 @@ func UpdateProductBroker(tx *gorm.DB, c *auth.Context, id uint, pbs *ProductBrok
 	pb.MarginValue = pbs.MarginValue
 	pb.MarketType  = pbs.MarketType
 	pb.ProductType = pbs.ProductType
-	pb.LocalClass  = pbs.LocalClass
 
 	db.UpdateProductBroker(tx, pb)
 
-	//err = sendChangeMessage(tx, c, ts, msg.TypeUpdate)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = sendProductBrokerChangeMessage(tx, c, pb, msg.TypeUpdate)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Log.Info("UpdateProductBroker: Product for broker updated", "id", pb.Id, "name", pb.Name)
 	return pb, err
@@ -182,28 +161,53 @@ func UpdateProductBroker(tx *gorm.DB, c *auth.Context, id uint, pbs *ProductBrok
 //===
 //=============================================================================
 
-//func sendChangeMessageX(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
-//	pb, err := db.GetProductBrokerById(tx, ts.ProductBrokerId)
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve product broker", "error", err.Error())
-//		return err
-//	}
-//
-//	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve currency", "error", err.Error())
-//		return err
-//	}
-//
-//	tsm := TradingSystemMessage{*ts, *pb, *cu}
-//	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceTradingSystem, &tsm)
-//
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not publish the update message", "error", err.Error())
-//		return err
-//	}
-//
-//	return nil
-//}
+func getProductBrokerAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, function string) (*db.ProductBroker, error) {
+	pb, err := db.GetProductBrokerById(tx, id)
+
+	if err != nil {
+		c.Log.Error(function +": Could not retrieve product for broker", "error", err.Error())
+		return nil, err
+	}
+
+	if pb == nil {
+		c.Log.Error(function +": Product for broker was not found", "id", id)
+		return nil, req.NewNotFoundError("Product for broker was not found: %v", id)
+	}
+
+	if ! c.Session.IsAdmin() {
+		if pb.Username != c.Session.Username {
+			c.Log.Error(function+": Product for broker not owned by user", "id", id)
+			return nil, req.NewForbiddenError("Product for broker is not owned by user: %v", id)
+		}
+	}
+
+	return pb, nil
+}
+
+//=============================================================================
+
+func sendProductBrokerChangeMessage(tx *gorm.DB, c *auth.Context, pb *db.ProductBroker, msgType int) error {
+	conn, err := db.GetConnectionById(tx, pb.ConnectionId)
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductBroker: Could not retrieve connection", "error", err.Error())
+		return err
+	}
+
+	exc, err := db.GetExchangeById(tx, pb.ExchangeId)
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductBroker: Could not retrieve exchange", "error", err.Error())
+		return err
+	}
+
+	pbm := ProductBrokerMessage{*pb, *conn, *exc}
+	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceProductBroker, &pbm)
+
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductBroker: Could not publish the update message", "error", err.Error())
+		return err
+	}
+
+	return nil
+}
 
 //=============================================================================

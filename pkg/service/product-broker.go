@@ -66,13 +66,13 @@ func getProductBrokerById(c *auth.Context) {
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				list, err := business.GetProductBrokerById(tx, c, id, details)
+				pb, err := business.GetProductBrokerById(tx, c, id, details)
 
 				if err != nil {
 					return err
 				}
 
-				return c.ReturnObject(&list)
+				return c.ReturnObject(&pb)
 			})
 		}
 	}

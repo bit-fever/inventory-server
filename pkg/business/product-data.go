@@ -26,6 +26,7 @@ package business
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/core/req"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"gorm.io/gorm"
@@ -50,41 +51,39 @@ func GetProductData(tx *gorm.DB, c *auth.Context, filter map[string]any, offset 
 func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*ProductDataExt, error) {
 	c.Log.Info("GetProductDataById: Getting a product for data", "id", id)
 
-	pd, err := db.GetProductDataById(tx, id)
+	pd, err := getProductDataAndCheckAccess(tx, c, id, "GetProductDataById")
 	if err != nil {
-		c.Log.Error("GetProductDataById: Could not retrieve product for data", "error", err.Error())
 		return nil, err
 	}
-	if pd == nil {
-		c.Log.Error("GetProductDataById: Product for data was not found", "id", id)
-		return nil, req.NewNotFoundError("Product for data was not found: %v", id)
+
+	//--- Get connection
+
+	conn, err := db.GetConnectionById(tx, pd.ConnectionId)
+	if err != nil {
+		c.Log.Error("GetProductDataById: Could not retrieve connection", "error", err.Error())
+		return nil, err
 	}
 
-	if pd.Username != c.Session.Username {
-		c.Log.Error("GetProductDataById: Product for data not owned by user", "id", id)
-		return nil, req.NewForbiddenError("Product for data is not owned by user: %v", id)
+	//--- Get exchange
+
+	exc, err  := db.GetExchangeById(tx, pd.ExchangeId)
+	if err != nil {
+		c.Log.Error("GetProductDataById: Could not retrieve exchange", "error", err.Error())
+		return nil, err
 	}
 
-	pe := &ProductDataExt{ ProductData: *pd }
+	//--- Add instruments, if it is the case
 
 	if details {
-		conn, err := db.GetConnectionById(tx, pd.ConnectionId)
-		if err != nil {
-			c.Log.Error("GetProductDataById: Could not retrieve connection", "error", err.Error())
-			return nil, err
-		}
-
-		exc, err  := db.GetExchangeById(tx, pd.ExchangeId)
-		if err != nil {
-			c.Log.Error("GetProductDataById: Could not retrieve exchange", "error", err.Error())
-			return nil, err
-		}
-
-		pe.Connection = *conn
-		pe.Exchange   = *exc
 	}
 
-	return pe, nil
+	pde := ProductDataExt{
+		ProductData: *pd,
+		Connection : *conn,
+		Exchange   : *exc,
+	}
+
+	return &pde, nil
 }
 
 //=============================================================================
@@ -101,7 +100,6 @@ func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.Pro
 	pd.Increment    = pds.Increment
 	pd.MarketType   = pds.MarketType
 	pd.ProductType  = pds.ProductType
-	pd.LocalClass   = pds.LocalClass
 
 	err := db.AddProductData(tx, &pd)
 
@@ -110,10 +108,10 @@ func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.Pro
 		return nil, err
 	}
 
-	//err = sendChangeMessage(tx, c, &pd, msg.TypeCreate)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = sendProductDataChangeMessage(tx, c, &pd, msg.TypeCreate)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Log.Info("AddProductData: Product for data added", "symbol", pd.Symbol, "id", pd.Id)
 	return &pd, err
@@ -124,44 +122,27 @@ func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.Pro
 func UpdateProductData(tx *gorm.DB, c *auth.Context, id uint, pds *ProductDataSpec) (*db.ProductData, error) {
 	c.Log.Info("UpdateProductData: Updating a product for data", "id", id, "name", pds.Name)
 
-	pd, err := db.GetProductDataById(tx, id)
+	pd, err := getProductDataAndCheckAccess(tx, c, id, "UpdateProductData")
 	if err != nil {
-		c.Log.Error("UpdateProductData: Could not retrieve product for data", "error", err.Error())
 		return nil, err
 	}
-	if pd == nil {
-		c.Log.Error("UpdateProductData: Product for data was not found", "id", id)
-		return nil, req.NewNotFoundError("Product for data was not found: %v", id)
-	}
 
-	if pd.Username != c.Session.Username {
-		c.Log.Error("UpdateProductData: Product for data not owned by user", "id", id)
-		return nil, req.NewForbiddenError("Product for data is not owned by user: %v", id)
-	}
+	//--- We can't change the exchange and the symbol
 
-	pd.ExchangeId  = pds.ExchangeId
-	pd.Symbol      = pds.Symbol
 	pd.Name        = pds.Name
 	pd.Increment   = pds.Increment
 	pd.MarketType  = pds.MarketType
 	pd.ProductType = pds.ProductType
-	pd.LocalClass  = pds.LocalClass
 
 	db.UpdateProductData(tx, pd)
 
-	//err = sendChangeMessage(tx, c, ts, msg.TypeUpdate)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = sendProductDataChangeMessage(tx, c, pd, msg.TypeUpdate)
+	if err != nil {
+		return nil, err
+	}
 
 	c.Log.Info("UpdateProductData: Product for data updated", "id", pd.Id, "name", pd.Name)
 	return pd, err
-}
-
-//=============================================================================
-
-func GetInstrumentDataByProductId(tx *gorm.DB, c *auth.Context, id uint)(*[]db.InstrumentData, error) {
-	return db.GetInstrumentsByDataId(tx, id)
 }
 
 //=============================================================================
@@ -170,28 +151,53 @@ func GetInstrumentDataByProductId(tx *gorm.DB, c *auth.Context, id uint)(*[]db.I
 //===
 //=============================================================================
 
-//func sendChangeMessageX(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
-//	pb, err := db.GetProductBrokerById(tx, ts.ProductBrokerId)
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve product broker", "error", err.Error())
-//		return err
-//	}
-//
-//	cu, err := db.GetCurrencyById(tx, pb.CurrencyId)
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve currency", "error", err.Error())
-//		return err
-//	}
-//
-//	tsm := TradingSystemMessage{*ts, *pb, *cu}
-//	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceTradingSystem, &tsm)
-//
-//	if err != nil {
-//		c.Log.Error("[Add|Update]TradingSystem: Could not publish the update message", "error", err.Error())
-//		return err
-//	}
-//
-//	return nil
-//}
+func getProductDataAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, function string) (*db.ProductData, error) {
+	pd, err := db.GetProductDataById(tx, id)
+
+	if err != nil {
+		c.Log.Error(function +": Could not retrieve product for data", "error", err.Error())
+		return nil, err
+	}
+
+	if pd == nil {
+		c.Log.Error(function +": Product for data was not found", "id", id)
+		return nil, req.NewNotFoundError("Product for data was not found: %v", id)
+	}
+
+	if ! c.Session.IsAdmin() {
+		if pd.Username != c.Session.Username {
+			c.Log.Error(function +": Product for data not owned by user", "id", id)
+			return nil, req.NewForbiddenError("Product for data is not owned by user: %v", id)
+		}
+	}
+
+	return pd, nil
+}
+
+//=============================================================================
+
+func sendProductDataChangeMessage(tx *gorm.DB, c *auth.Context, pd *db.ProductData, msgType int) error {
+	conn, err := db.GetConnectionById(tx, pd.ConnectionId)
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductData: Could not retrieve connection", "error", err.Error())
+		return err
+	}
+
+	exc, err := db.GetExchangeById(tx, pd.ExchangeId)
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductData: Could not retrieve exchange", "error", err.Error())
+		return err
+	}
+
+	pdm := ProductDataMessage{*pd, *conn, *exc}
+	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceProductData, &pdm)
+
+	if err != nil {
+		c.Log.Error("[Add|Update]ProductData: Could not publish the update message", "error", err.Error())
+		return err
+	}
+
+	return nil
+}
 
 //=============================================================================
