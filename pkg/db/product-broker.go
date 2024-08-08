@@ -86,8 +86,8 @@ func AddProductBroker(tx *gorm.DB, pb *ProductBroker) error {
 
 //=============================================================================
 
-func UpdateProductBroker(tx *gorm.DB, pb *ProductBroker) {
-	tx.Updates(pb)
+func UpdateProductBroker(tx *gorm.DB, pb *ProductBroker) error {
+	return tx.Save(pb).Error
 }
 
 //=============================================================================

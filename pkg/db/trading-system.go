@@ -100,8 +100,8 @@ func AddTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
 
 //=============================================================================
 
-func UpdateTradingSystem(tx *gorm.DB, ts *TradingSystem) {
-	tx.Updates(ts)
+func UpdateTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
+	return tx.Save(ts).Error
 }
 
 //=============================================================================

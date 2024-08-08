@@ -85,8 +85,8 @@ func AddProductData(tx *gorm.DB, ts *ProductData) error {
 
 //=============================================================================
 
-func UpdateProductData(tx *gorm.DB, ts *ProductData) {
-	tx.Updates(ts)
+func UpdateProductData(tx *gorm.DB, ts *ProductData) error {
+	return tx.Save(ts).Error
 }
 
 //=============================================================================
