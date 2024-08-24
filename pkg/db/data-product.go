@@ -31,8 +31,8 @@ import (
 
 //=============================================================================
 
-func GetProductBrokers(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
-	var list []ProductBrokerFull
+func GetDataProducts(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]DataProductFull, error) {
+	var list []DataProductFull
 	res := tx.Where(filter).Offset(offset).Limit(limit).Find(&list)
 
 	if res.Error != nil {
@@ -44,13 +44,12 @@ func GetProductBrokers(tx *gorm.DB, filter map[string]any, offset int, limit int
 
 //=============================================================================
 
-func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]ProductBrokerFull, error) {
-	var list []ProductBrokerFull
-	query :=	"SELECT pb.*, m.code as currency_code, c.code as connection_code, e.code as exchange_code " +
-				"FROM product_broker pb " +
-				"LEFT JOIN connection c on pb.connection_id = c.id " +
-				"LEFT JOIN exchange   e on pb.exchange_id   = e.id "  +
-				"LEFT JOIN currency   m on  e.currency_id   = m.id "
+func GetDataProductsFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]DataProductFull, error) {
+	var list []DataProductFull
+	query :=	"SELECT dp.*, c.code as connection_code, c.system_code as system_code, e.code as exchange_code " +
+				"FROM data_product dp " +
+				"LEFT JOIN connection c on dp.connection_id = c.id "+
+				"LEFT JOIN exchange   e on dp.exchange_id   = e.id"
 
 	res := tx.Raw(query).Where(filter).Offset(offset).Limit(limit).Find(&list)
 
@@ -63,8 +62,8 @@ func GetProductBrokersFull(tx *gorm.DB, filter map[string]any, offset int, limit
 
 //=============================================================================
 
-func GetProductBrokerById(tx *gorm.DB, id uint) (*ProductBroker, error) {
-	var list []ProductBroker
+func GetDataProductById(tx *gorm.DB, id uint) (*DataProduct, error) {
+	var list []DataProduct
 	res := tx.Find(&list, id)
 
 	if res.Error != nil {
@@ -80,14 +79,14 @@ func GetProductBrokerById(tx *gorm.DB, id uint) (*ProductBroker, error) {
 
 //=============================================================================
 
-func AddProductBroker(tx *gorm.DB, pb *ProductBroker) error {
-	return tx.Create(pb).Error
+func AddDataProduct(tx *gorm.DB, ts *DataProduct) error {
+	return tx.Create(ts).Error
 }
 
 //=============================================================================
 
-func UpdateProductBroker(tx *gorm.DB, pb *ProductBroker) error {
-	return tx.Save(pb).Error
+func UpdateDataProduct(tx *gorm.DB, ts *DataProduct) error {
+	return tx.Save(ts).Error
 }
 
 //=============================================================================

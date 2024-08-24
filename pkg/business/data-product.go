@@ -34,24 +34,24 @@ import (
 
 //=============================================================================
 
-func GetProductData(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.ProductDataFull, error) {
+func GetDataProducts(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int, details bool) (*[]db.DataProductFull, error) {
 	if ! c.Session.IsAdmin() {
 		filter["username"] = c.Session.Username
 	}
 
 	if details {
-		return db.GetProductDataFull(tx, filter, offset, limit)
+		return db.GetDataProductsFull(tx, filter, offset, limit)
 	}
 
-	return db.GetProductData(tx, filter, offset, limit)
+	return db.GetDataProducts(tx, filter, offset, limit)
 }
 
 //=============================================================================
 
-func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*ProductDataExt, error) {
-	c.Log.Info("GetProductDataById: Getting a product for data", "id", id)
+func GetDataProductById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*DataProductExt, error) {
+	c.Log.Info("GetDataProductById: Getting a data product", "id", id)
 
-	pd, err := getProductDataAndCheckAccess(tx, c, id, "GetProductDataById")
+	pd, err := getDataProductAndCheckAccess(tx, c, id, "GetDataProductById")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*P
 
 	conn, err := db.GetConnectionById(tx, pd.ConnectionId)
 	if err != nil {
-		c.Log.Error("GetProductDataById: Could not retrieve connection", "error", err.Error())
+		c.Log.Error("GetDataProductById: Could not retrieve connection", "error", err.Error())
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*P
 
 	exc, err  := db.GetExchangeById(tx, pd.ExchangeId)
 	if err != nil {
-		c.Log.Error("GetProductDataById: Could not retrieve exchange", "error", err.Error())
+		c.Log.Error("GetDataProductById: Could not retrieve exchange", "error", err.Error())
 		return nil, err
 	}
 
@@ -77,8 +77,8 @@ func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*P
 	if details {
 	}
 
-	pde := ProductDataExt{
-		ProductData: *pd,
+	pde := DataProductExt{
+		DataProduct: *pd,
 		Connection : *conn,
 		Exchange   : *exc,
 	}
@@ -88,10 +88,10 @@ func GetProductDataById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*P
 
 //=============================================================================
 
-func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.ProductData, error) {
-	c.Log.Info("AddProductData: Adding a new product for data", "symbol", pds.Symbol, "name", pds.Name)
+func AddDataProduct(tx *gorm.DB, c *auth.Context, pds *DataProductSpec) (*db.DataProduct, error) {
+	c.Log.Info("AddDataProduct: Adding a new data product", "symbol", pds.Symbol, "name", pds.Name)
 
-	var pd db.ProductData
+	var pd db.DataProduct
 	pd.ConnectionId = pds.ConnectionId
 	pd.ExchangeId   = pds.ExchangeId
 	pd.Username     = c.Session.Username
@@ -101,28 +101,28 @@ func AddProductData(tx *gorm.DB, c *auth.Context, pds *ProductDataSpec) (*db.Pro
 	pd.MarketType   = pds.MarketType
 	pd.ProductType  = pds.ProductType
 
-	err := db.AddProductData(tx, &pd)
+	err := db.AddDataProduct(tx, &pd)
 
 	if err != nil {
-		c.Log.Error("AddProductData: Could not add a new product for data", "error", err.Error())
+		c.Log.Error("AddDataProduct: Could not add a new data product", "error", err.Error())
 		return nil, err
 	}
 
-	err = sendProductDataChangeMessage(tx, c, &pd, msg.TypeCreate)
+	err = sendDataProductChangeMessage(tx, c, &pd, msg.TypeCreate)
 	if err != nil {
 		return nil, err
 	}
 
-	c.Log.Info("AddProductData: Product for data added", "symbol", pd.Symbol, "id", pd.Id)
+	c.Log.Info("AddDataProduct: Data product added", "symbol", pd.Symbol, "id", pd.Id)
 	return &pd, err
 }
 
 //=============================================================================
 
-func UpdateProductData(tx *gorm.DB, c *auth.Context, id uint, pds *ProductDataSpec) (*db.ProductData, error) {
-	c.Log.Info("UpdateProductData: Updating a product for data", "id", id, "name", pds.Name)
+func UpdateDataProduct(tx *gorm.DB, c *auth.Context, id uint, pds *DataProductSpec) (*db.DataProduct, error) {
+	c.Log.Info("UpdateDataProduct: Updating a data product", "id", id, "name", pds.Name)
 
-	pd, err := getProductDataAndCheckAccess(tx, c, id, "UpdateProductData")
+	pd, err := getDataProductAndCheckAccess(tx, c, id, "UpdateDataProduct")
 	if err != nil {
 		return nil, err
 	}
@@ -134,14 +134,17 @@ func UpdateProductData(tx *gorm.DB, c *auth.Context, id uint, pds *ProductDataSp
 	pd.MarketType  = pds.MarketType
 	pd.ProductType = pds.ProductType
 
-	db.UpdateProductData(tx, pd)
-
-	err = sendProductDataChangeMessage(tx, c, pd, msg.TypeUpdate)
+	err = db.UpdateDataProduct(tx, pd)
 	if err != nil {
 		return nil, err
 	}
 
-	c.Log.Info("UpdateProductData: Product for data updated", "id", pd.Id, "name", pd.Name)
+	err = sendDataProductChangeMessage(tx, c, pd, msg.TypeUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Log.Info("UpdateDataProduct: Data product updated", "id", pd.Id, "name", pd.Name)
 	return pd, err
 }
 
@@ -151,23 +154,23 @@ func UpdateProductData(tx *gorm.DB, c *auth.Context, id uint, pds *ProductDataSp
 //===
 //=============================================================================
 
-func getProductDataAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, function string) (*db.ProductData, error) {
-	pd, err := db.GetProductDataById(tx, id)
+func getDataProductAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, function string) (*db.DataProduct, error) {
+	pd, err := db.GetDataProductById(tx, id)
 
 	if err != nil {
-		c.Log.Error(function +": Could not retrieve product for data", "error", err.Error())
+		c.Log.Error(function +": Could not retrieve data product", "error", err.Error())
 		return nil, err
 	}
 
 	if pd == nil {
-		c.Log.Error(function +": Product for data was not found", "id", id)
-		return nil, req.NewNotFoundError("Product for data was not found: %v", id)
+		c.Log.Error(function +": Data product was not found", "id", id)
+		return nil, req.NewNotFoundError("Data product was not found: %v", id)
 	}
 
 	if ! c.Session.IsAdmin() {
 		if pd.Username != c.Session.Username {
-			c.Log.Error(function +": Product for data not owned by user", "id", id)
-			return nil, req.NewForbiddenError("Product for data is not owned by user: %v", id)
+			c.Log.Error(function +": Data product not owned by user", "id", id)
+			return nil, req.NewForbiddenError("Data product is not owned by user: %v", id)
 		}
 	}
 
@@ -176,24 +179,24 @@ func getProductDataAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, functio
 
 //=============================================================================
 
-func sendProductDataChangeMessage(tx *gorm.DB, c *auth.Context, pd *db.ProductData, msgType int) error {
+func sendDataProductChangeMessage(tx *gorm.DB, c *auth.Context, pd *db.DataProduct, msgType int) error {
 	conn, err := db.GetConnectionById(tx, pd.ConnectionId)
 	if err != nil {
-		c.Log.Error("[Add|Update]ProductData: Could not retrieve connection", "error", err.Error())
+		c.Log.Error("[Add|Update]DataProduct: Could not retrieve connection", "error", err.Error())
 		return err
 	}
 
 	exc, err := db.GetExchangeById(tx, pd.ExchangeId)
 	if err != nil {
-		c.Log.Error("[Add|Update]ProductData: Could not retrieve exchange", "error", err.Error())
+		c.Log.Error("[Add|Update]DataProduct: Could not retrieve exchange", "error", err.Error())
 		return err
 	}
 
-	pdm := ProductDataMessage{*pd, *conn, *exc}
-	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceProductData, &pdm)
+	pdm := DataProductMessage{*pd, *conn, *exc}
+	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceDataProduct, &pdm)
 
 	if err != nil {
-		c.Log.Error("[Add|Update]ProductData: Could not publish the update message", "error", err.Error())
+		c.Log.Error("[Add|Update]DataProduct: Could not publish the update message", "error", err.Error())
 		return err
 	}
 

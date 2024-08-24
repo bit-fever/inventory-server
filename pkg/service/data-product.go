@@ -33,7 +33,7 @@ import (
 
 //=============================================================================
 
-func getProductData(c *auth.Context) {
+func getDataProducts(c *auth.Context) {
 	filter := map[string]any{}
 	offset, limit, err := c.GetPagingParams()
 
@@ -42,7 +42,7 @@ func getProductData(c *auth.Context) {
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				list, err := business.GetProductData(tx, c, filter, offset, limit, details)
+				list, err := business.GetDataProducts(tx, c, filter, offset, limit, details)
 
 				if err != nil {
 					return err
@@ -58,7 +58,7 @@ func getProductData(c *auth.Context) {
 
 //=============================================================================
 
-func getProductDataById(c *auth.Context) {
+func getDataProductById(c *auth.Context) {
 	id, err := c.GetIdFromUrl()
 
 	if err == nil {
@@ -66,7 +66,7 @@ func getProductDataById(c *auth.Context) {
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				pd, err := business.GetProductDataById(tx, c, id, details)
+				pd, err := business.GetDataProductById(tx, c, id, details)
 
 				if err != nil {
 					return err
@@ -82,13 +82,13 @@ func getProductDataById(c *auth.Context) {
 
 //=============================================================================
 
-func addProductData(c *auth.Context) {
-	var pds business.ProductDataSpec
+func addDataProduct(c *auth.Context) {
+	var pds business.DataProductSpec
 	err := c.BindParamsFromBody(&pds)
 
 	if err == nil {
 		err = db.RunInTransaction(func(tx *gorm.DB) error {
-			ts, err := business.AddProductData(tx, c, &pds)
+			ts, err := business.AddDataProduct(tx, c, &pds)
 
 			if err != nil {
 				return err
@@ -103,8 +103,8 @@ func addProductData(c *auth.Context) {
 
 //=============================================================================
 
-func updateProductData(c *auth.Context) {
-	var pds business.ProductDataSpec
+func updateDataProduct(c *auth.Context) {
+	var pds business.DataProductSpec
 	err := c.BindParamsFromBody(&pds)
 
 	if err == nil {
@@ -112,7 +112,7 @@ func updateProductData(c *auth.Context) {
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				ts, err := business.UpdateProductData(tx, c, id, &pds)
+				ts, err := business.UpdateDataProduct(tx, c, id, &pds)
 
 				if err != nil {
 					return err

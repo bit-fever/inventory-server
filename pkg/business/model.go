@@ -39,8 +39,8 @@ type ConnectionSpec struct {
 
 type TradingSystemSpec struct {
 	PortfolioId      uint   `json:"portfolioId"       binding:"required"`
-	ProductDataId    uint   `json:"productDataId"     binding:"required"`
-	ProductBrokerId  uint   `json:"productBrokerId"   binding:"required"`
+	DataProductId    uint   `json:"dataProductId"     binding:"required"`
+	BrokerProductId  uint   `json:"brokerProductId"   binding:"required"`
 	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
 	WorkspaceCode    string `json:"workspaceCode"     binding:"required"`
 	Name             string `json:"name"              binding:"required"`
@@ -48,7 +48,7 @@ type TradingSystemSpec struct {
 
 //=============================================================================
 
-type ProductDataSpec struct {
+type DataProductSpec struct {
 	ConnectionId uint    `json:"connectionId"   binding:"required"`
 	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
 	Symbol       string  `json:"symbol"         binding:"required"`
@@ -60,7 +60,7 @@ type ProductDataSpec struct {
 
 //=============================================================================
 
-type ProductBrokerSpec struct {
+type BrokerProductSpec struct {
 	ConnectionId uint    `json:"connectionId"   binding:"required"`
 	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
 	Symbol       string  `json:"symbol"         binding:"required"`
@@ -102,17 +102,17 @@ func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystemFull) {
 //===
 //=============================================================================
 
-type ProductBrokerExt struct {
-	db.ProductBroker
+type BrokerProductExt struct {
+	db.BrokerProduct
 	Connection  db.Connection         `json:"connection"`
 	Exchange    db.Exchange           `json:"exchange"`
-	Instruments []db.InstrumentBroker `json:"instruments,omitempty"`
+	Instruments []db.BrokerInstrument `json:"instruments,omitempty"`
 }
 
 //=============================================================================
 
-type ProductDataExt struct {
-	db.ProductData
+type DataProductExt struct {
+	db.DataProduct
 	Connection  db.Connection  `json:"connection,omitempty"`
 	Exchange    db.Exchange    `json:"exchange,omitempty"`
 }
@@ -125,24 +125,25 @@ type ProductDataExt struct {
 
 type TradingSystemMessage struct {
 	TradingSystem db.TradingSystem `json:"tradingSystem"`
-	ProductBroker db.ProductBroker `json:"productBroker"`
+	BrokerProduct db.BrokerProduct `json:"brokerProduct"`
 	Currency      db.Currency      `json:"currency"`
 }
 
 //=============================================================================
 
-type ProductDataMessage struct {
-	ProductData db.ProductData `json:"productData"`
+type DataProductMessage struct {
+	DataProduct db.DataProduct `json:"dataProduct"`
 	Connection  db.Connection  `json:"connection"`
 	Exchange    db.Exchange    `json:"exchange"`
 }
 
 //=============================================================================
 
-type ProductBrokerMessage struct {
-	ProductBroker db.ProductBroker `json:"productBroker"`
+type BrokerProductMessage struct {
+	BrokerProduct db.BrokerProduct `json:"brokerProduct"`
 	Connection    db.Connection    `json:"connection"`
 	Exchange      db.Exchange      `json:"exchange"`
+	Currency      db.Currency      `json:"currency"`
 }
 
 //=============================================================================

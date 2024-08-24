@@ -56,8 +56,8 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.WorkspaceCode    = tss.WorkspaceCode
 	ts.Name             = tss.Name
 	ts.PortfolioId      = tss.PortfolioId
-	ts.ProductDataId    = tss.ProductDataId
-	ts.ProductBrokerId  = tss.ProductBrokerId
+	ts.DataProductId    = tss.DataProductId
+	ts.BrokerProductId  = tss.BrokerProductId
 	ts.TradingSessionId = tss.TradingSessionId
 
 	err := db.AddTradingSystem(tx, &ts)
@@ -99,8 +99,8 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 	ts.WorkspaceCode    = tss.WorkspaceCode
 	ts.Name             = tss.Name
 	ts.PortfolioId      = tss.PortfolioId
-	ts.ProductDataId    = tss.ProductDataId
-	ts.ProductBrokerId  = tss.ProductBrokerId
+	ts.DataProductId    = tss.DataProductId
+	ts.BrokerProductId  = tss.BrokerProductId
 	ts.TradingSessionId = tss.TradingSessionId
 
 	db.UpdateTradingSystem(tx, ts)
@@ -121,13 +121,13 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 //=============================================================================
 
 func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
-	pb, err := db.GetProductBrokerById(tx, ts.ProductBrokerId)
+	bp, err := db.GetBrokerProductById(tx, ts.BrokerProductId)
 	if err != nil {
-		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve product broker", "error", err.Error())
+		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve broker product", "error", err.Error())
 		return err
 	}
 
-	ex, err := db.GetExchangeById(tx, pb.ExchangeId)
+	ex, err := db.GetExchangeById(tx, bp.ExchangeId)
 	if err != nil {
 		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve exchange", "error", err.Error())
 		return err
@@ -139,7 +139,7 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		return err
 	}
 
-	tsm := TradingSystemMessage{*ts, *pb, *cu}
+	tsm := TradingSystemMessage{*ts, *bp, *cu}
 	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceTradingSystem, &tsm)
 
 	if err != nil {

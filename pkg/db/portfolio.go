@@ -43,35 +43,3 @@ func GetPortfolios(tx *gorm.DB, filter map[string]any, offset int, limit int) (*
 }
 
 //=============================================================================
-
-//func GetPortfolioById(tx *gorm.DB, id uint) (*Portfolio, error) {
-//	var p Portfolio
-//	res := tx.First(&p, id)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	return &p, nil
-//}
-
-//=============================================================================
-
-//func GetOrCreatePortfolio(tx *gorm.DB, name string, p *Portfolio) (*Portfolio, error) {
-//	res := tx.Where(&Portfolio{Name: name}).FirstOrCreate(&p)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	return p, nil
-//}
-
-//=============================================================================
-
-//func AddPortfolio(tx *gorm.DB, p *Portfolio) error {
-//	err := tx.Create(p).Error
-//	return req.NewServerErrorByError(err)
-//}
-
-//=============================================================================

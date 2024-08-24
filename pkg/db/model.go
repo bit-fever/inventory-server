@@ -83,7 +83,7 @@ type Portfolio struct {
 
 //=============================================================================
 
-type ProductData struct {
+type DataProduct struct {
 	Common
 	ConnectionId uint     `json:"connectionId"`
 	ExchangeId   uint     `json:"exchangeId"`
@@ -97,8 +97,8 @@ type ProductData struct {
 
 //=============================================================================
 
-type ProductDataFull struct {
-	ProductData
+type DataProductFull struct {
+	DataProduct
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
 	SystemCode      string  `json:"systemCode,omitempty"`
 	ExchangeCode    string  `json:"exchangeCode,omitempty"`
@@ -106,7 +106,7 @@ type ProductDataFull struct {
 
 //=============================================================================
 
-type ProductBroker struct {
+type BrokerProduct struct {
 	Common
 	ConnectionId     uint     `json:"connectionId"`
 	ExchangeId       uint     `json:"exchangeId"`
@@ -122,8 +122,8 @@ type ProductBroker struct {
 
 //=============================================================================
 
-type ProductBrokerFull struct {
-	ProductBroker
+type BrokerProductFull struct {
+	BrokerProduct
 	CurrencyCode    string  `json:"currencyCode,omitempty"`
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
 	ExchangeCode    string  `json:"exchangeCode,omitempty"`
@@ -131,9 +131,9 @@ type ProductBrokerFull struct {
 
 //=============================================================================
 
-type InstrumentBroker struct {
+type BrokerInstrument struct {
 	Id               uint    `json:"id" gorm:"primaryKey"`
-	ProductBrokerId  uint    `json:"productBrokerId"`
+	BrokerProductId  uint    `json:"brokerProductId"`
 	Symbol           string  `json:"symbol"`
 	Name             string  `json:"name"`
 	ExpirationDate   int     `json:"expirationDate"`
@@ -153,8 +153,8 @@ type TradingSession struct {
 type TradingSystem struct {
 	Common
 	PortfolioId       uint    `json:"portfolioId"`
-	ProductDataId     uint    `json:"productDataId"`
-	ProductBrokerId   uint    `json:"productBrokerId"`
+	DataProductId     uint    `json:"dataProductId"`
+	BrokerProductId   uint    `json:"brokerProductId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
 	Username          string  `json:"username"`
 	WorkspaceCode     string  `json:"workspaceCode"`
@@ -177,14 +177,14 @@ type TradingSystemFull struct {
 //===
 //=============================================================================
 
-func (Currency)         TableName() string { return "currency" }
-func (Exchange)         TableName() string { return "exchange" }
-func (Connection)       TableName() string { return "connection" }
-func (Portfolio)        TableName() string { return "portfolio" }
-func (ProductData)      TableName() string { return "product_data" }
-func (ProductBroker)    TableName() string { return "product_broker" }
-func (InstrumentBroker) TableName() string { return "instrument_broker" }
-func (TradingSession)   TableName() string { return "trading_session" }
-func (TradingSystem)    TableName() string { return "trading_system" }
+func (Currency)         TableName() string { return "currency"          }
+func (Exchange)         TableName() string { return "exchange"          }
+func (Connection)       TableName() string { return "connection"        }
+func (Portfolio)        TableName() string { return "portfolio"         }
+func (DataProduct)      TableName() string { return "data_product"      }
+func (BrokerProduct)    TableName() string { return "broker_product"    }
+func (BrokerInstrument) TableName() string { return "broker_instrument" }
+func (TradingSession)   TableName() string { return "trading_session"   }
+func (TradingSystem)    TableName() string { return "trading_system"    }
 
 //=============================================================================

@@ -61,25 +61,13 @@ func GetTradingSystemById(tx *gorm.DB, id uint) (*TradingSystem, error) {
 
 //=============================================================================
 
-//func GetTradingSystemsByIds(tx *gorm.DB, ids []uint) (*[]TradingSystem, error) {
-//	var list []TradingSystem
-//	res := tx.Find(&list, ids)
-//
-//	if res.Error != nil {
-//		return nil, req.NewServerErrorByError(res.Error)
-//	}
-//
-//	return &list, nil
-//}
-
-//=============================================================================
-
 func GetTradingSystemsFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]TradingSystemFull, error) {
 	var list []TradingSystemFull
-	query := "SELECT ts.*, pd.symbol as data_symbol, pb.symbol as broker_symbol, p.name as portfolio_name, s.name as trading_session " +
+	query :=
+		"SELECT ts.*, dp.symbol as data_symbol, bp.symbol as broker_symbol, p.name as portfolio_name, s.name as trading_session " +
 		"FROM trading_system ts " +
-		"LEFT JOIN product_data    pd on ts.product_data_id   = pd.id " +
-		"LEFT JOIN product_broker  pb on ts.product_broker_id = pb.id " +
+		"LEFT JOIN data_product    dp on ts.data_product_id   = dp.id " +
+		"LEFT JOIN broker_product  bp on ts.broker_product_id = bp.id " +
 		"LEFT JOIN portfolio       p  on ts.portfolio_id      = p.id " +
 		"LEFT JOIN trading_session s  on ts.trading_session_id= s.id"
 

@@ -44,15 +44,15 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 	router.GET ("/api/inventory/v1/currencies",                   ctrl.Secure(getCurrencies,                roles.Admin_User_Service))
 	router.GET ("/api/inventory/v1/exchanges",                    ctrl.Secure(getExchanges,                 roles.Admin_User_Service))
 
-	router.GET ("/api/inventory/v1/product-data",                 ctrl.Secure(getProductData,               roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/product-data",                 ctrl.Secure(addProductData,               roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-data/:id",             ctrl.Secure(getProductDataById,           roles.Admin_User_Service))
-	router.PUT ("/api/inventory/v1/product-data/:id",             ctrl.Secure(updateProductData,            roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/data-products",                ctrl.Secure(getDataProducts,              roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/data-products",                ctrl.Secure(addDataProduct,               roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/data-products/:id",            ctrl.Secure(getDataProductById,           roles.Admin_User_Service))
+	router.PUT ("/api/inventory/v1/data-products/:id",            ctrl.Secure(updateDataProduct,            roles.Admin_User_Service))
 
-	router.GET ("/api/inventory/v1/product-brokers",              ctrl.Secure(getProductBrokers,            roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/product-brokers",              ctrl.Secure(addProductBroker,             roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/product-brokers/:id",          ctrl.Secure(getProductBrokerById,         roles.Admin_User_Service))
-	router.PUT ("/api/inventory/v1/product-brokers/:id",          ctrl.Secure(updateProductBroker,          roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/broker-products",              ctrl.Secure(getBrokerProducts,            roles.Admin_User_Service))
+	router.POST("/api/inventory/v1/broker-products",              ctrl.Secure(addBrokerProduct,             roles.Admin_User_Service))
+	router.GET ("/api/inventory/v1/broker-products/:id",          ctrl.Secure(getBrokerProductById,         roles.Admin_User_Service))
+	router.PUT ("/api/inventory/v1/broker-products/:id",          ctrl.Secure(updateBrokerProduct,          roles.Admin_User_Service))
 
 	router.GET ("/api/inventory/v1/trading-systems",              ctrl.Secure(getTradingSystems,            roles.Admin_User_Service))
 	router.POST("/api/inventory/v1/trading-systems",              ctrl.Secure(addTradingSystem,             roles.Admin_User_Service))
