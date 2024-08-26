@@ -97,7 +97,6 @@ func AddDataProduct(tx *gorm.DB, c *auth.Context, pds *DataProductSpec) (*db.Dat
 	pd.Username     = c.Session.Username
 	pd.Symbol       = pds.Symbol
 	pd.Name         = pds.Name
-	pd.Increment    = pds.Increment
 	pd.MarketType   = pds.MarketType
 	pd.ProductType  = pds.ProductType
 
@@ -130,7 +129,6 @@ func UpdateDataProduct(tx *gorm.DB, c *auth.Context, id uint, pds *DataProductSp
 	//--- We can't change the exchange and the symbol
 
 	pd.Name        = pds.Name
-	pd.Increment   = pds.Increment
 	pd.MarketType  = pds.MarketType
 	pd.ProductType = pds.ProductType
 

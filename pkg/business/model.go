@@ -53,7 +53,6 @@ type DataProductSpec struct {
 	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
 	Symbol       string  `json:"symbol"         binding:"required"`
 	Name         string  `json:"name"           binding:"required"`
-	Increment    float64 `json:"increment"      binding:"required,min=0,max=1"`
 	MarketType   string  `json:"marketType"     binding:"required"`
 	ProductType  string  `json:"productType"    binding:"required"`
 }
@@ -68,6 +67,7 @@ type BrokerProductSpec struct {
 	PointValue   float32 `json:"pointValue"     binding:"required,min=0"`
 	CostPerTrade float32 `json:"costPerTrade"   binding:"required,min=0"`
 	MarginValue  float32 `json:"marginValue"    binding:"required,min=0"`
+	Increment    float64 `json:"increment"      binding:"required,min=0,max=1"`
 	MarketType   string  `json:"marketType"     binding:"required"`
 	ProductType  string  `json:"productType"    binding:"required"`
 }

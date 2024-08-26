@@ -106,6 +106,7 @@ func AddBrokerProduct(tx *gorm.DB, c *auth.Context, bps *BrokerProductSpec) (*db
 	pb.PointValue   = bps.PointValue
 	pb.CostPerTrade = bps.CostPerTrade
 	pb.MarginValue  = bps.MarginValue
+	pb.Increment    = bps.Increment
 	pb.MarketType   = bps.MarketType
 	pb.ProductType  = bps.ProductType
 
@@ -141,6 +142,7 @@ func UpdateBrokerProduct(tx *gorm.DB, c *auth.Context, id uint, pbs *BrokerProdu
 	pb.PointValue  = pbs.PointValue
 	pb.CostPerTrade= pbs.CostPerTrade
 	pb.MarginValue = pbs.MarginValue
+	pb.Increment   = pbs.Increment
 	pb.MarketType  = pbs.MarketType
 	pb.ProductType = pbs.ProductType
 
