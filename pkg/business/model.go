@@ -24,7 +24,10 @@ THE SOFTWARE.
 
 package business
 
-import "github.com/bit-fever/inventory-server/pkg/db"
+import (
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"github.com/bit-fever/sick-engine/session"
+)
 
 //=============================================================================
 
@@ -70,6 +73,15 @@ type BrokerProductSpec struct {
 	Increment    float64 `json:"increment"      binding:"required,min=0,max=1"`
 	MarketType   string  `json:"marketType"     binding:"required"`
 	ProductType  string  `json:"productType"    binding:"required"`
+}
+
+//=============================================================================
+
+type TradingSession struct {
+	db.Common
+	Username  string                  `json:"username"`
+	Name      string                  `json:"name"`
+	Session   *session.TradingSession `json:"session"`
 }
 
 //=============================================================================

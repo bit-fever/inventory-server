@@ -25,19 +25,48 @@ THE SOFTWARE.
 package business
 
 import (
+	"encoding/json"
 	"github.com/bit-fever/core/auth"
 	"github.com/bit-fever/inventory-server/pkg/db"
+	"github.com/bit-fever/sick-engine/session"
 	"gorm.io/gorm"
 )
 
 //=============================================================================
 
-func GetTradingSessions(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]db.TradingSession, error) {
+func GetTradingSessions(tx *gorm.DB, c *auth.Context, filter map[string]any, offset int, limit int) (*[]TradingSession, error) {
 	if ! c.Session.IsAdmin() {
 		filter["username"] = c.Session.Username
 	}
 
-	return db.GetTradingSessions(tx, filter, offset, limit)
+	list,err := db.GetTradingSessions(tx, filter, offset, limit)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res []TradingSession
+
+	for _, dbTs := range *list {
+		var sickTs session.TradingSession
+
+		err = json.Unmarshal([]byte(dbTs.Config),&sickTs)
+		if err != nil {
+			c.Log.Error("GetTradingSessions: Invalid session config", "error", err.Error())
+			return nil, err
+		}
+
+		busTs := TradingSession{
+			Common  : dbTs.Common,
+			Name    : dbTs.Name,
+			Username: dbTs.Username,
+			Session : &sickTs,
+		}
+
+		res = append(res, busTs)
+	}
+
+	return &res, nil
 }
 
 //=============================================================================
