@@ -98,17 +98,17 @@ func AddBrokerProduct(tx *gorm.DB, c *auth.Context, bps *BrokerProductSpec) (*db
 	c.Log.Info("AddBrokerProduct: Adding a new broker product", "symbol", bps.Symbol, "name", bps.Name)
 
 	var pb db.BrokerProduct
-	pb.ConnectionId = bps.ConnectionId
-	pb.ExchangeId   = bps.ExchangeId
-	pb.Username     = c.Session.Username
-	pb.Symbol       = bps.Symbol
-	pb.Name         = bps.Name
-	pb.PointValue   = bps.PointValue
-	pb.CostPerTrade = bps.CostPerTrade
-	pb.MarginValue  = bps.MarginValue
-	pb.Increment    = bps.Increment
-	pb.MarketType   = bps.MarketType
-	pb.ProductType  = bps.ProductType
+	pb.ConnectionId     = bps.ConnectionId
+	pb.ExchangeId       = bps.ExchangeId
+	pb.Username         = c.Session.Username
+	pb.Symbol           = bps.Symbol
+	pb.Name             = bps.Name
+	pb.PointValue       = bps.PointValue
+	pb.CostPerOperation = bps.CostPerOperation
+	pb.MarginValue      = bps.MarginValue
+	pb.Increment        = bps.Increment
+	pb.MarketType       = bps.MarketType
+	pb.ProductType      = bps.ProductType
 
 	err := db.AddBrokerProduct(tx, &pb)
 
@@ -136,15 +136,15 @@ func UpdateBrokerProduct(tx *gorm.DB, c *auth.Context, id uint, pbs *BrokerProdu
 		return nil, err
 	}
 
-	pb.ExchangeId  = pbs.ExchangeId
-	pb.Symbol      = pbs.Symbol
-	pb.Name        = pbs.Name
-	pb.PointValue  = pbs.PointValue
-	pb.CostPerTrade= pbs.CostPerTrade
-	pb.MarginValue = pbs.MarginValue
-	pb.Increment   = pbs.Increment
-	pb.MarketType  = pbs.MarketType
-	pb.ProductType = pbs.ProductType
+	pb.ExchangeId      = pbs.ExchangeId
+	pb.Symbol          = pbs.Symbol
+	pb.Name            = pbs.Name
+	pb.PointValue      = pbs.PointValue
+	pb.CostPerOperation= pbs.CostPerOperation
+	pb.MarginValue     = pbs.MarginValue
+	pb.Increment       = pbs.Increment
+	pb.MarketType      = pbs.MarketType
+	pb.ProductType     = pbs.ProductType
 
 	err = db.UpdateBrokerProduct(tx, pb)
 	if err != nil {

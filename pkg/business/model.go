@@ -63,16 +63,16 @@ type DataProductSpec struct {
 //=============================================================================
 
 type BrokerProductSpec struct {
-	ConnectionId uint    `json:"connectionId"   binding:"required"`
-	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
-	Symbol       string  `json:"symbol"         binding:"required"`
-	Name         string  `json:"name"           binding:"required"`
-	PointValue   float32 `json:"pointValue"     binding:"required,min=0"`
-	CostPerTrade float32 `json:"costPerTrade"   binding:"required,min=0"`
-	MarginValue  float32 `json:"marginValue"    binding:"required,min=0"`
-	Increment    float64 `json:"increment"      binding:"required,min=0,max=1"`
-	MarketType   string  `json:"marketType"     binding:"required"`
-	ProductType  string  `json:"productType"    binding:"required"`
+	ConnectionId     uint    `json:"connectionId"     binding:"required"`
+	ExchangeId       uint    `json:"exchangeId"       binding:"required"`
+	Symbol           string  `json:"symbol"           binding:"required"`
+	Name             string  `json:"name"             binding:"required"`
+	PointValue       float32 `json:"pointValue"       binding:"min=0,max=1000000"`
+	CostPerOperation float32 `json:"costPerOperation" binding:"min=0,max=10000"`
+	MarginValue      float32 `json:"marginValue"      binding:"min=0,max=1000000"`
+	Increment        float64 `json:"increment"        binding:"min=0,max=1"`
+	MarketType       string  `json:"marketType"       binding:"required"`
+	ProductType      string  `json:"productType"      binding:"required"`
 }
 
 //=============================================================================

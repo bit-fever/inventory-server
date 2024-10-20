@@ -113,7 +113,7 @@ type BrokerProduct struct {
 	Symbol           string   `json:"symbol"`
 	Name             string   `json:"name"`
 	PointValue       float32  `json:"pointValue"`
-	CostPerTrade     float32  `json:"costPerTrade"`
+	CostPerOperation float32  `json:"costPerOperation"`
 	MarginValue      float32  `json:"marginValue"`
 	Increment        float64  `json:"increment"`
 	MarketType       string   `json:"marketType"`
