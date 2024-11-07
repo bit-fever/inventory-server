@@ -3,7 +3,7 @@ module github.com/bit-fever/inventory-server
 go 1.22
 
 require (
-	github.com/bit-fever/core v1.7.6
+	github.com/bit-fever/core v1.8.0
 	github.com/bit-fever/sick-engine v0.0.2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.8.1 // indirect

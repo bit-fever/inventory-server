@@ -191,7 +191,7 @@ func sendDataProductChangeMessage(tx *gorm.DB, c *auth.Context, pd *db.DataProdu
 	}
 
 	pdm := DataProductMessage{*pd, *conn, *exc}
-	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceDataProduct, &pdm)
+	err = msg.SendMessage(msg.ExInventory, msg.SourceDataProduct, msgType, &pdm)
 
 	if err != nil {
 		c.Log.Error("[Add|Update]DataProduct: Could not publish the update message", "error", err.Error())

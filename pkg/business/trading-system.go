@@ -140,7 +140,7 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 	}
 
 	tsm := TradingSystemMessage{*ts, *bp, *cu}
-	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceTradingSystem, &tsm)
+	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msgType, &tsm)
 
 	if err != nil {
 		c.Log.Error("[Add|Update]TradingSystem: Could not publish the update message", "error", err.Error())

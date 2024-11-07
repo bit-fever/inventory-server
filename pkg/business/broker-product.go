@@ -215,7 +215,7 @@ func sendBrokerProductChangeMessage(tx *gorm.DB, c *auth.Context, pb *db.BrokerP
 	}
 
 	pbm := BrokerProductMessage{*pb, *conn, *exc, *cur }
-	err = msg.SendMessage(msg.ExInventoryUpdates, msg.OriginDb, msgType, msg.SourceBrokerProduct, &pbm)
+	err = msg.SendMessage(msg.ExInventory, msg.SourceBrokerProduct, msgType, &pbm)
 
 	if err != nil {
 		c.Log.Error("[Add|Update]BrokerProduct: Could not publish the update message", "error", err.Error())
