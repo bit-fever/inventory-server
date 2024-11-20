@@ -66,3 +66,9 @@ func AddConnection(tx *gorm.DB, conn *Connection) error {
 }
 
 //=============================================================================
+
+func UpdateConnection(tx *gorm.DB, conn *Connection) error {
+	return tx.Save(conn).Error
+}
+
+//=============================================================================

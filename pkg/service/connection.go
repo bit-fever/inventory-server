@@ -94,3 +94,29 @@ func addConnection(c *auth.Context) {
 }
 
 //=============================================================================
+
+func updateConnection(c *auth.Context) {
+	var cs business.ConnectionSpec
+	err := c.BindParamsFromBody(&cs)
+
+	if err == nil {
+		var id uint
+		id,err = c.GetIdFromUrl()
+
+		if err == nil {
+			err = db.RunInTransaction(func(tx *gorm.DB) error {
+				ts, err := business.UpdateConnection(tx, c, id, &cs)
+
+				if err != nil {
+					return err
+				}
+
+				return c.ReturnObject(ts)
+			})
+		}
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================

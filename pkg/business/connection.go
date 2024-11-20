@@ -104,3 +104,54 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 }
 
 //=============================================================================
+
+func UpdateConnection(tx *gorm.DB, c *auth.Context, id uint, cs *ConnectionSpec) (*db.Connection, error) {
+	c.Log.Info("UpdateConnection: Updating a connection", "id", id, "name", cs.Name)
+
+	conn, err := getConnectionAndCheckAccess(tx, c, id, "UpdateConnection")
+	if err != nil {
+		return nil, err
+	}
+
+	conn.Name         = cs.Name
+	conn.SystemConfig = cs.SystemConfig
+
+	err = db.UpdateConnection(tx, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Log.Info("UpdateConnection: Connection updated", "id", conn.Id, "name", conn.Name)
+	return conn, err
+}
+
+//=============================================================================
+//===
+//=== Private functions
+//===
+//=============================================================================
+
+func getConnectionAndCheckAccess(tx *gorm.DB, c *auth.Context, id uint, function string) (*db.Connection, error) {
+	conn, err := db.GetConnectionById(tx, id)
+
+	if err != nil {
+		c.Log.Error(function +": Could not retrieve connection", "error", err.Error())
+		return nil, err
+	}
+
+	if conn == nil {
+		c.Log.Error(function +": Connection was not found", "id", id)
+		return nil, req.NewNotFoundError("Connection was not found: %v", id)
+	}
+
+	if ! c.Session.IsAdmin() {
+		if conn.Username != c.Session.Username {
+			c.Log.Error(function+": Connection not owned by user", "id", id)
+			return nil, req.NewForbiddenError("Connection is not owned by user: %v", id)
+		}
+	}
+
+	return conn, nil
+}
+
+//=============================================================================
