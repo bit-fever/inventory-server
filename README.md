@@ -1,6 +1,3 @@
-# inventory-server
-Standalone server that manages instrument information
+# Inventory server
+Standalone server that manages inventory information (products, brokers, trading systems, connections, etc...)
 
-## To do
-
-- connection.edit: manage the duplicate key on DB if the same system is added twice
