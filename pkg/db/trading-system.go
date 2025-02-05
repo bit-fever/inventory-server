@@ -93,3 +93,9 @@ func UpdateTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
 }
 
 //=============================================================================
+
+func DeleteTradingSystem(tx *gorm.DB, id uint) error {
+	return tx.Delete(&TradingSystem{}, id).Error
+}
+
+//=============================================================================

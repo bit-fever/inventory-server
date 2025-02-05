@@ -111,7 +111,47 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 	}
 
 	c.Log.Info("UpdateTradingSystem: Trading system updated", "id", ts.Id, "name", ts.Name)
-	return ts, err
+	return ts, nil
+}
+
+//=============================================================================
+
+func DeleteTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*db.TradingSystem, error) {
+	c.Log.Info("DeleteTradingSystem: Deleting trading system", "id", id)
+
+	ts, err := db.GetTradingSystemById(tx, id)
+	if err != nil {
+		c.Log.Error("DeleteTradingSystem: Could not retrieve trading system", "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	if ts == nil {
+		c.Log.Error("DeleteTradingSystem: Trading system was not found", "id", id)
+		return nil,req.NewNotFoundError("Trading system was not found: %v", id)
+	}
+
+	if ts.Username != c.Session.Username {
+		c.Log.Error("DeleteTradingSystem: Trading system not owned by user", "id", id)
+		return nil,req.NewForbiddenError("Trading system is not owned by user: %v", id)
+	}
+
+	err = db.DeleteTradingSystem(tx, id)
+	if err != nil {
+		c.Log.Error("DeleteTradingSystem: Cannot delete trading system", "id", id, "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	tsm := TradingSystemMessage{}
+	tsm.TradingSystem = *ts
+	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msg.TypeDelete, &tsm)
+
+	if err != nil {
+		c.Log.Error("DeleteTradingSystem: Could not publish the delete message", "id", id, "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	c.Log.Info("DeleteTradingSystem: Trading system deleted", "id", id, "name", ts.Name)
+	return ts, nil
 }
 
 //=============================================================================
