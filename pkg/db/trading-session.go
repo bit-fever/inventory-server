@@ -43,3 +43,20 @@ func GetTradingSessions(tx *gorm.DB, filter map[string]any, offset int, limit in
 }
 
 //=============================================================================
+
+func GetTradingSessionById(tx *gorm.DB, id uint) (*TradingSession, error) {
+	var list []TradingSession
+	res := tx.Find(&list, id)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
+
+//=============================================================================

@@ -159,6 +159,8 @@ type TradingSystem struct {
 	Username          string  `json:"username"`
 	WorkspaceCode     string  `json:"workspaceCode"`
 	Name              string  `json:"name"`
+	Timeframe         int     `json:"timeframe"`
+	Scope             string  `json:"scope"`
 }
 
 //=============================================================================

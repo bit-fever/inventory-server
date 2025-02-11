@@ -59,9 +59,10 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.DataProductId    = tss.DataProductId
 	ts.BrokerProductId  = tss.BrokerProductId
 	ts.TradingSessionId = tss.TradingSessionId
+	ts.Timeframe        = tss.Timeframe
+	ts.Scope            = tss.Scope
 
 	err := db.AddTradingSystem(tx, &ts)
-
 	if err != nil {
 		c.Log.Error("AddTradingSystem: Could not add a new trading system", "error", err.Error())
 		return nil, err
@@ -102,8 +103,14 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 	ts.DataProductId    = tss.DataProductId
 	ts.BrokerProductId  = tss.BrokerProductId
 	ts.TradingSessionId = tss.TradingSessionId
+	ts.Timeframe        = tss.Timeframe
+	ts.Scope            = tss.Scope
 
-	db.UpdateTradingSystem(tx, ts)
+	err = db.UpdateTradingSystem(tx, ts)
+	if err != nil {
+		c.Log.Error("UpdateTradingSystem: Could not update a trading system", "error", err.Error(), "id", ts.Id)
+		return nil, err
+	}
 
 	err = sendChangeMessage(tx, c, ts, msg.TypeUpdate)
 	if err != nil {
@@ -161,29 +168,41 @@ func DeleteTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*db.TradingSyst
 //=============================================================================
 
 func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
+	dp, err := db.GetDataProductById(tx, ts.DataProductId)
+	if err != nil {
+		c.Log.Error("sendChangeMessage: Could not retrieve data product of TS", "error", err.Error(), "id", ts.Id)
+		return err
+	}
+
 	bp, err := db.GetBrokerProductById(tx, ts.BrokerProductId)
 	if err != nil {
-		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve broker product", "error", err.Error())
+		c.Log.Error("sendChangeMessage: Could not retrieve broker product of TS", "error", err.Error(), "id", ts.Id)
 		return err
 	}
 
 	ex, err := db.GetExchangeById(tx, bp.ExchangeId)
 	if err != nil {
-		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve exchange", "error", err.Error())
+		c.Log.Error("sendChangeMessage: Could not retrieve exchange of TS", "error", err.Error(), "id", ts.Id)
 		return err
 	}
 
 	cu, err := db.GetCurrencyById(tx, ex.CurrencyId)
 	if err != nil {
-		c.Log.Error("[Add|Update]TradingSystem: Could not retrieve currency", "error", err.Error())
+		c.Log.Error("sendChangeMessage: Could not retrieve currency of TS", "error", err.Error(), "id", ts.Id)
 		return err
 	}
 
-	tsm := TradingSystemMessage{*ts, *bp, *cu}
+	se, err := db.GetTradingSessionById(tx, ts.TradingSessionId)
+	if err != nil {
+		c.Log.Error("sendChangeMessage: Could not retrieve trading session of TS", "error", err.Error(), "id", ts.Id)
+		return err
+	}
+
+	tsm := TradingSystemMessage{*ts, *dp, *bp, *cu, *se}
 	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msgType, &tsm)
 
 	if err != nil {
-		c.Log.Error("[Add|Update]TradingSystem: Could not publish the update message", "error", err.Error())
+		c.Log.Error("sendChangeMessage: Could not publish the update message for TS", "error", err.Error(), "id", ts.Id)
 		return err
 	}
 

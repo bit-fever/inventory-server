@@ -47,6 +47,8 @@ type TradingSystemSpec struct {
 	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
 	WorkspaceCode    string `json:"workspaceCode"     binding:"required"`
 	Name             string `json:"name"              binding:"required"`
+	Timeframe        int    `json:"timeframe"         binding:"required"`
+	Scope            string `json:"scope"             binding:"required"`
 }
 
 //=============================================================================
@@ -136,9 +138,11 @@ type DataProductExt struct {
 //=============================================================================
 
 type TradingSystemMessage struct {
-	TradingSystem db.TradingSystem `json:"tradingSystem"`
-	BrokerProduct db.BrokerProduct `json:"brokerProduct"`
-	Currency      db.Currency      `json:"currency"`
+	TradingSystem  db.TradingSystem  `json:"tradingSystem"`
+	DataProduct    db.DataProduct    `json:"dataProduct"`
+	BrokerProduct  db.BrokerProduct  `json:"brokerProduct"`
+	Currency       db.Currency       `json:"currency"`
+	TradingSession db.TradingSession `json:"tradingSession"`
 }
 
 //=============================================================================
