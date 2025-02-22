@@ -49,18 +49,23 @@ func GetTradingSystems(tx *gorm.DB, c *auth.Context, filter map[string]any, offs
 //=============================================================================
 
 func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db.TradingSystem, error) {
-	c.Log.Info("AddTradingSystem: Adding a new trading system", "workspaceCode", tss.WorkspaceCode, "name", tss.Name)
+	c.Log.Info("AddTradingSystem: Adding a new trading system", "name", tss.Name)
+
+	//TODO: validate type
 
 	var ts db.TradingSystem
-	ts.Username         = c.Session.Username
-	ts.WorkspaceCode    = tss.WorkspaceCode
-	ts.Name             = tss.Name
-	ts.PortfolioId      = tss.PortfolioId
-	ts.DataProductId    = tss.DataProductId
-	ts.BrokerProductId  = tss.BrokerProductId
-	ts.TradingSessionId = tss.TradingSessionId
-	ts.Timeframe        = tss.Timeframe
-	ts.Scope            = tss.Scope
+	ts.Username          = c.Session.Username
+	ts.DataProductId     = tss.DataProductId
+	ts.BrokerProductId   = tss.BrokerProductId
+	ts.TradingSessionId  = tss.TradingSessionId
+	ts.AgentProfileId    = tss.AgentProfileId
+	ts.Name              = tss.Name
+	ts.Scope             = db.ScopeDevelopment
+	ts.Timeframe         = tss.Timeframe
+	ts.StrategyType      = tss.StrategyType
+	ts.Overnight         = tss.Overnight
+	ts.Tags              = tss.Tags
+	ts.ExternalRef       = tss.ExternalRef
 
 	err := db.AddTradingSystem(tx, &ts)
 	if err != nil {
@@ -73,7 +78,7 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 		return nil, err
 	}
 
-	c.Log.Info("AddTradingSystem: Trading system added", "workspaceCode", ts.WorkspaceCode, "id", ts.Id)
+	c.Log.Info("AddTradingSystem: Trading system added", "id", ts.Id)
 	return &ts, err
 }
 
@@ -97,14 +102,18 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 		return nil, req.NewForbiddenError("Trading system is not owned by user: %v", id)
 	}
 
-	ts.WorkspaceCode    = tss.WorkspaceCode
-	ts.Name             = tss.Name
-	ts.PortfolioId      = tss.PortfolioId
-	ts.DataProductId    = tss.DataProductId
-	ts.BrokerProductId  = tss.BrokerProductId
-	ts.TradingSessionId = tss.TradingSessionId
-	ts.Timeframe        = tss.Timeframe
-	ts.Scope            = tss.Scope
+	//TODO: validate type
+
+	ts.DataProductId     = tss.DataProductId
+	ts.BrokerProductId   = tss.BrokerProductId
+	ts.TradingSessionId  = tss.TradingSessionId
+	ts.AgentProfileId    = tss.AgentProfileId
+	ts.Name              = tss.Name
+	ts.Timeframe         = tss.Timeframe
+	ts.StrategyType      = tss.StrategyType
+	ts.Overnight         = tss.Overnight
+	ts.Tags              = tss.Tags
+	ts.ExternalRef       = tss.ExternalRef
 
 	err = db.UpdateTradingSystem(tx, ts)
 	if err != nil {
@@ -198,7 +207,13 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		return err
 	}
 
-	tsm := TradingSystemMessage{*ts, *dp, *bp, *cu, *se}
+	ap, err := db.GetAgentProfileById(tx, ts.AgentProfileId)
+	if err != nil {
+		c.Log.Error("sendChangeMessage: Could not retrieve agent profile of TS", "error", err.Error(), "id", ts.Id)
+		return err
+	}
+
+	tsm := TradingSystemMessage{*ts, *dp, *bp, *cu, *se, *ap}
 	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msgType, &tsm)
 
 	if err != nil {

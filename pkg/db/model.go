@@ -74,15 +74,6 @@ type Connection struct {
 
 //=============================================================================
 
-type Portfolio struct {
-	Common
-	ParentId  uint    `json:"parentId"`
-	Username  string  `json:"username"`
-	Name      string  `json:"name"`
-}
-
-//=============================================================================
-
 type DataProduct struct {
 	Common
 	ConnectionId uint     `json:"connectionId"`
@@ -150,17 +141,22 @@ type TradingSession struct {
 
 //=============================================================================
 
+const ScopeDevelopment = "DV"
+
 type TradingSystem struct {
 	Common
-	PortfolioId       uint    `json:"portfolioId"`
+	Username          string  `json:"username"`
 	DataProductId     uint    `json:"dataProductId"`
 	BrokerProductId   uint    `json:"brokerProductId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
-	Username          string  `json:"username"`
-	WorkspaceCode     string  `json:"workspaceCode"`
+	AgentProfileId    uint    `json:"agentProfileId"`
 	Name              string  `json:"name"`
-	Timeframe         int     `json:"timeframe"`
 	Scope             string  `json:"scope"`
+	Timeframe         int     `json:"timeframe"`
+	StrategyType      string  `json:"strategyType"`
+	Overnight         bool    `json:"overnight"`
+	Tags              string  `json:"tags"`
+	ExternalRef       string  `json:"externalRef"`
 }
 
 //=============================================================================
@@ -174,6 +170,17 @@ type TradingSystemFull struct {
 }
 
 //=============================================================================
+
+type AgentProfile struct {
+	Common
+	Username    string  `json:"username"`
+	Name        string  `json:"name"`
+	RemoteUrl   string  `json:"remoteUrl"`
+	SslKeyRef   string  `json:"sslKeyRef"`
+	SslCertRef  string  `json:"sslCertRef"`
+}
+
+//=============================================================================
 //===
 //=== Table names
 //===
@@ -182,7 +189,7 @@ type TradingSystemFull struct {
 func (Currency)         TableName() string { return "currency"          }
 func (Exchange)         TableName() string { return "exchange"          }
 func (Connection)       TableName() string { return "connection"        }
-func (Portfolio)        TableName() string { return "portfolio"         }
+func (AgentProfile)     TableName() string { return "agent_profile"     }
 func (DataProduct)      TableName() string { return "data_product"      }
 func (BrokerProduct)    TableName() string { return "broker_product"    }
 func (BrokerInstrument) TableName() string { return "broker_instrument" }

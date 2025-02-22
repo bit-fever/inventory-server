@@ -41,14 +41,16 @@ type ConnectionSpec struct {
 //=============================================================================
 
 type TradingSystemSpec struct {
-	PortfolioId      uint   `json:"portfolioId"       binding:"required"`
-	DataProductId    uint   `json:"dataProductId"     binding:"required"`
-	BrokerProductId  uint   `json:"brokerProductId"   binding:"required"`
-	TradingSessionId uint   `json:"tradingSessionId"  binding:"required"`
-	WorkspaceCode    string `json:"workspaceCode"     binding:"required"`
-	Name             string `json:"name"              binding:"required"`
-	Timeframe        int    `json:"timeframe"         binding:"required"`
-	Scope            string `json:"scope"             binding:"required"`
+	DataProductId     uint   `json:"dataProductId"     binding:"required"`
+	BrokerProductId   uint   `json:"brokerProductId"   binding:"required"`
+	TradingSessionId  uint   `json:"tradingSessionId"  binding:"required"`
+	AgentProfileId    uint   `json:"agentProfileId"`
+	Name              string `json:"name"              binding:"required"`
+	Timeframe         int    `json:"timeframe"         binding:"min=1,max=1440"`
+	StrategyType      string `json:"strategyType"      binding:"required"`
+	Overnight         bool   `json:"overnight"         binding:"required"`
+	Tags              string `json:"tags"`
+	ExternalRef       string `json:"externalRef"`
 }
 
 //=============================================================================
@@ -88,30 +90,6 @@ type TradingSession struct {
 
 //=============================================================================
 //===
-//=== Portfolio tree
-//===
-//=============================================================================
-
-type PortfolioTree struct {
-	db.Portfolio
-	Children       []*PortfolioTree        `json:"children"`
-	TradingSystems []*db.TradingSystemFull `json:"tradingSystems"`
-}
-
-//-----------------------------------------------------------------------------
-
-func (pt *PortfolioTree) AddChild(p *PortfolioTree) {
-	pt.Children = append(pt.Children, p)
-}
-
-//-----------------------------------------------------------------------------
-
-func (pt *PortfolioTree) AddTradingSystem(ts *db.TradingSystemFull) {
-	pt.TradingSystems = append(pt.TradingSystems, ts)
-}
-
-//=============================================================================
-//===
 //=== ProductBroker & ProductData composite structs
 //===
 //=============================================================================
@@ -138,11 +116,12 @@ type DataProductExt struct {
 //=============================================================================
 
 type TradingSystemMessage struct {
-	TradingSystem  db.TradingSystem  `json:"tradingSystem"`
-	DataProduct    db.DataProduct    `json:"dataProduct"`
-	BrokerProduct  db.BrokerProduct  `json:"brokerProduct"`
-	Currency       db.Currency       `json:"currency"`
-	TradingSession db.TradingSession `json:"tradingSession"`
+	TradingSystem   db.TradingSystem   `json:"tradingSystem"`
+	DataProduct     db.DataProduct     `json:"dataProduct"`
+	BrokerProduct   db.BrokerProduct   `json:"brokerProduct"`
+	Currency        db.Currency        `json:"currency"`
+	TradingSession  db.TradingSession  `json:"tradingSession"`
+	AgentProfile    db.AgentProfile    `json:"agentProfile"`
 }
 
 //=============================================================================
@@ -160,6 +139,20 @@ type BrokerProductMessage struct {
 	Connection    db.Connection    `json:"connection"`
 	Exchange      db.Exchange      `json:"exchange"`
 	Currency      db.Currency      `json:"currency"`
+}
+
+//=============================================================================
+
+// TradingSessionMessage TODO: To be implemented
+type TradingSessionMessage struct {
+	TradingSession  db.TradingSession  `json:"tradingSession"`
+}
+
+//=============================================================================
+
+// AgentProfileMessage TODO: To be implemented
+type AgentProfileMessage struct {
+	AgentProfile db.AgentProfile `json:"agentProfile"`
 }
 
 //=============================================================================
