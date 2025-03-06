@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2025 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,43 +22,63 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package agentscanner
 
 import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/process/agentscanner"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+	"time"
 )
 
 //=============================================================================
 
-const component = "inventory-server"
+type TradingSystem struct {
+	Name       string
+	DataSymbol string
 
-//=============================================================================
-
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	msg.InitMessaging(&cfg.Messaging)
-	service.Init(engine, cfg, logger)
-	agentscanner.InitScanner(cfg)
-	boot.RunHttpServer(engine, &cfg.Application)
+	Trades []*Trade
 }
 
 //=============================================================================
 
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+type Trade struct {
+	EntryDate   int
+	EntryTime   int
+	EntryPrice  float64
+	EntryLabel  string
+	ExitDate    int
+	ExitTime    int
+	ExitPrice   float64
+	ExitLabel   string
+	GrossProfit float64
+	Contracts   int
+	Position    int
+}
+
+//=============================================================================
+
+type TradeListMessage struct {
+	TradingSystemId uint         `json:"tradingSystemId"`
+	Trades          []*TradeItem `json:"trades"`
+}
+
+//=============================================================================
+
+const (
+	TradeTypeLong  = "LO"
+	TradeTypeShort = "SH"
+)
+
+//=============================================================================
+
+type TradeItem struct {
+	TradeType       string       `json:"tradeType"`
+	EntryDate       *time.Time   `json:"entryDate"`
+	EntryPrice      float64      `json:"entryPrice"`
+	EntryLabel      string       `json:"entryLabel"`
+	ExitDate        *time.Time   `json:"exitDate"`
+	ExitPrice       float64      `json:"exitPrice"`
+	ExitLabel       string       `json:"exitLabel"`
+	GrossProfit     float64      `json:"grossProfit"`
+	Contracts       int          `json:"contracts"`
 }
 
 //=============================================================================

@@ -149,7 +149,7 @@ type TradingSystem struct {
 	DataProductId     uint    `json:"dataProductId"`
 	BrokerProductId   uint    `json:"brokerProductId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
-	AgentProfileId    uint    `json:"agentProfileId"`
+	AgentProfileId    uint    `json:"agentProfileId" gorm:"default:null"`
 	Name              string  `json:"name"`
 	Scope             string  `json:"scope"`
 	Timeframe         int     `json:"timeframe"`
@@ -173,11 +173,12 @@ type TradingSystemFull struct {
 
 type AgentProfile struct {
 	Common
-	Username    string  `json:"username"`
-	Name        string  `json:"name"`
-	RemoteUrl   string  `json:"remoteUrl"`
-	SslKeyRef   string  `json:"sslKeyRef"`
-	SslCertRef  string  `json:"sslCertRef"`
+	Username     string  `json:"username"`
+	Name         string  `json:"name"`
+	RemoteUrl    string  `json:"remoteUrl"`
+	SslKeyRef    string  `json:"sslKeyRef"`
+	SslCertRef   string  `json:"sslCertRef"`
+	ScanInterval int     `json:"scanInterval"`
 }
 
 //=============================================================================

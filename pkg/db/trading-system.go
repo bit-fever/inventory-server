@@ -81,6 +81,23 @@ func GetTradingSystemsFull(tx *gorm.DB, filter map[string]any, offset int, limit
 
 //=============================================================================
 
+func GetTradingSystemByExtRef(tx *gorm.DB, username string, externalRef string) (*TradingSystem, error) {
+	var list []TradingSystem
+	res := tx.Find(&list, "external_ref = ? and username = ?", externalRef, username)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
+
+//=============================================================================
+
 func AddTradingSystem(tx *gorm.DB, ts *TradingSystem) error {
 	return tx.Create(ts).Error
 }

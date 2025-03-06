@@ -44,11 +44,11 @@ type TradingSystemSpec struct {
 	DataProductId     uint   `json:"dataProductId"     binding:"required"`
 	BrokerProductId   uint   `json:"brokerProductId"   binding:"required"`
 	TradingSessionId  uint   `json:"tradingSessionId"  binding:"required"`
-	AgentProfileId    uint   `json:"agentProfileId"`
+	AgentProfileId    uint   `json:"agentProfileId"    gorm:"default:null"`
 	Name              string `json:"name"              binding:"required"`
 	Timeframe         int    `json:"timeframe"         binding:"min=1,max=1440"`
 	StrategyType      string `json:"strategyType"      binding:"required"`
-	Overnight         bool   `json:"overnight"         binding:"required"`
+	Overnight         bool   `json:"overnight"`
 	Tags              string `json:"tags"`
 	ExternalRef       string `json:"externalRef"`
 }
