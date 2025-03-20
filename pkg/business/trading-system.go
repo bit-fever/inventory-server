@@ -60,12 +60,17 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.TradingSessionId  = tss.TradingSessionId
 	ts.AgentProfileId    = tss.AgentProfileId
 	ts.Name              = tss.Name
-	ts.Scope             = db.ScopeDevelopment
 	ts.Timeframe         = tss.Timeframe
 	ts.StrategyType      = tss.StrategyType
 	ts.Overnight         = tss.Overnight
 	ts.Tags              = tss.Tags
 	ts.ExternalRef       = tss.ExternalRef
+	ts.Scope             = db.ScopeDevelopment
+
+	if ts.AgentProfileId != 0 {
+		//--- If the trading system is external, we don't need to start from the development phase
+		ts.Scope = db.ScopeReady
+	}
 
 	err := db.AddTradingSystem(tx, &ts)
 	if err != nil {

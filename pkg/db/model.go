@@ -142,6 +142,9 @@ type TradingSession struct {
 //=============================================================================
 
 const ScopeDevelopment = "DV"
+const ScopeReady       = "RD"
+const ScopeTrading     = "TR"
+const ScopeReview      = "RV"
 
 type TradingSystem struct {
 	Common
@@ -165,7 +168,6 @@ type TradingSystemFull struct {
 	TradingSystem
 	DataSymbol     string `json:"dataSymbol,omitempty"`
 	BrokerSymbol   string `json:"brokerSymbol,omitempty"`
-	PortfolioName  string `json:"portfolioName,omitempty"`
 	TradingSession string `json:"tradingSession,omitempty"`
 }
 

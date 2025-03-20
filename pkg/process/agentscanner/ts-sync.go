@@ -195,7 +195,7 @@ func enqueueAgentTrades(tx *gorm.DB, ap *db.AgentProfile, agentTss []TradingSyst
 		var list []*TradeItem
 
 		for _, atr := range ats.Trades {
-			tr := createTrade(atr, location)
+			tr := createTrade(&ats, atr, location)
 			if tr == nil {
 				return errors.New("aborted")
 			}
@@ -241,7 +241,7 @@ func getLocation(tx *gorm.DB, ts *db.TradingSystem) (*time.Location, error) {
 
 //=============================================================================
 
-func createTrade(atr *Trade, loc *time.Location) *TradeItem {
+func createTrade(ats *TradingSystem, atr *Trade, loc *time.Location) *TradeItem {
 	tradeType := "?"
 
 	if atr.Position == 1 {
@@ -249,7 +249,7 @@ func createTrade(atr *Trade, loc *time.Location) *TradeItem {
 	} else if atr.Position == -1 {
 		tradeType = TradeTypeShort
 	} else {
-		slog.Error("createTrade: Unknown trade type!", "tradeType", atr.Position)
+		slog.Error("createTrade: Unknown trade type!", "tradeType", atr.Position, "name", ats.Name)
 		return nil
 	}
 
@@ -257,12 +257,17 @@ func createTrade(atr *Trade, loc *time.Location) *TradeItem {
 	exitDate ,err2 := parseDate(atr.ExitDate,  atr.ExitTime,  loc)
 
 	if err1 != nil {
-		slog.Error("createTrade: Cannot parse entry date/time", "entryDate", atr.EntryDate, "entryTime", atr.EntryTime)
+		slog.Error("createTrade: Cannot parse entry date/time", "entryDate", atr.EntryDate, "entryTime", atr.EntryTime, "name", ats.Name)
 		return nil
 	}
 
 	if err2 != nil {
-		slog.Error("createTrade: Cannot parse exit date/time", "exitDate", atr.ExitDate, "exitTime", atr.ExitTime)
+		slog.Error("createTrade: Cannot parse exit date/time", "exitDate", atr.ExitDate, "exitTime", atr.ExitTime, "name", ats.Name)
+		return nil
+	}
+
+	if atr.Contracts == 0 {
+		slog.Error("createTrade: Cannot manage 0 contracts", "name", ats.Name)
 		return nil
 	}
 
@@ -284,6 +289,7 @@ func createTrade(atr *Trade, loc *time.Location) *TradeItem {
 func parseDate(date int, tim int, loc *time.Location) (time.Time, error) {
 	sDate := DateToString(date)
 	sTime := TimeToString(tim)
+
 	return time.ParseInLocation(time.DateTime, sDate+" "+sTime, loc)
 }
 
@@ -294,7 +300,7 @@ func DateToString(date int) string {
 	m := (date / 100) % 100
 	d := date % 100
 
-	return fmt.Sprintf("%4d-%2d-%2d", y, m, d)
+	return fmt.Sprintf("%04d-%02d-%02d", y, m, d)
 }
 
 //=============================================================================
@@ -303,7 +309,7 @@ func TimeToString(t int) string {
 	hh := t / 100
 	mm := t % 100
 
-	return fmt.Sprintf("%2d:%2d:00", hh, mm)
+	return fmt.Sprintf("%02d:%02d:00", hh, mm)
 }
 
 //=============================================================================
