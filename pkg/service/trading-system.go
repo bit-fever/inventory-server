@@ -123,3 +123,22 @@ func deleteTradingSystem(c *auth.Context) {
 }
 
 //=============================================================================
+
+func finalizeTradingSystem(c *auth.Context) {
+	id,err := c.GetIdFromUrl()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			ts, err := business.FinalizeTradingSystem(tx, c, id)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(ts)
+		})
+	}
+	c.ReturnError(err)
+}
+
+//=============================================================================

@@ -116,12 +116,12 @@ type DataProductExt struct {
 //=============================================================================
 
 type TradingSystemMessage struct {
-	TradingSystem   db.TradingSystem   `json:"tradingSystem"`
-	DataProduct     db.DataProduct     `json:"dataProduct"`
-	BrokerProduct   db.BrokerProduct   `json:"brokerProduct"`
-	Currency        db.Currency        `json:"currency"`
-	TradingSession  db.TradingSession  `json:"tradingSession"`
-	AgentProfile    db.AgentProfile    `json:"agentProfile"`
+	TradingSystem   *db.TradingSystem   `json:"tradingSystem"`
+	DataProduct     *db.DataProduct     `json:"dataProduct"`
+	BrokerProduct   *db.BrokerProduct   `json:"brokerProduct"`
+	Currency        *db.Currency        `json:"currency"`
+	TradingSession  *db.TradingSession  `json:"tradingSession"`
+	AgentProfile    *db.AgentProfile    `json:"agentProfile"`
 }
 
 //=============================================================================

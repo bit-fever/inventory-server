@@ -54,22 +54,21 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	//TODO: validate type
 
 	var ts db.TradingSystem
-	ts.Username          = c.Session.Username
-	ts.DataProductId     = tss.DataProductId
-	ts.BrokerProductId   = tss.BrokerProductId
-	ts.TradingSessionId  = tss.TradingSessionId
-	ts.AgentProfileId    = tss.AgentProfileId
-	ts.Name              = tss.Name
-	ts.Timeframe         = tss.Timeframe
-	ts.StrategyType      = tss.StrategyType
-	ts.Overnight         = tss.Overnight
-	ts.Tags              = tss.Tags
-	ts.ExternalRef       = tss.ExternalRef
-	ts.Scope             = db.ScopeDevelopment
+	ts.Username         = c.Session.Username
+	ts.DataProductId    = tss.DataProductId
+	ts.BrokerProductId  = tss.BrokerProductId
+	ts.TradingSessionId = tss.TradingSessionId
+	ts.AgentProfileId   = tss.AgentProfileId
+	ts.Name             = tss.Name
+	ts.Timeframe        = tss.Timeframe
+	ts.StrategyType     = tss.StrategyType
+	ts.Overnight        = tss.Overnight
+	ts.Tags             = tss.Tags
+	ts.ExternalRef      = tss.ExternalRef
 
 	if ts.AgentProfileId != 0 {
 		//--- If the trading system is external, we don't need to start from the development phase
-		ts.Scope = db.ScopeReady
+		ts.Finalized = true
 	}
 
 	err := db.AddTradingSystem(tx, &ts)
@@ -92,19 +91,9 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSystemSpec) (*db.TradingSystem, error) {
 	c.Log.Info("UpdateTradingSystem: Updating a trading system", "id", id, "name", tss.Name)
 
-	ts, err := db.GetTradingSystemById(tx, id)
+	ts, err := getTradingSystem(tx, c, id, "UpdateTradingSystem")
 	if err != nil {
-		c.Log.Error("UpdateTradingSystem: Could not retrieve trading system", "error", err.Error())
 		return nil, err
-	}
-	if ts == nil {
-		c.Log.Error("UpdateTradingSystem: Trading system was not found", "id", id)
-		return nil, req.NewNotFoundError("Trading system was not found: %v", id)
-	}
-
-	if ts.Username != c.Session.Username {
-		c.Log.Error("UpdateTradingSystem: Trading system not owned by user", "id", id)
-		return nil, req.NewForbiddenError("Trading system is not owned by user: %v", id)
 	}
 
 	//TODO: validate type
@@ -140,20 +129,9 @@ func UpdateTradingSystem(tx *gorm.DB, c *auth.Context, id uint, tss *TradingSyst
 func DeleteTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*db.TradingSystem, error) {
 	c.Log.Info("DeleteTradingSystem: Deleting trading system", "id", id)
 
-	ts, err := db.GetTradingSystemById(tx, id)
+	ts, err := getTradingSystem(tx, c, id, "DeleteTradingSystem")
 	if err != nil {
-		c.Log.Error("DeleteTradingSystem: Could not retrieve trading system", "error", err.Error())
-		return nil,req.NewServerErrorByError(err)
-	}
-
-	if ts == nil {
-		c.Log.Error("DeleteTradingSystem: Trading system was not found", "id", id)
-		return nil,req.NewNotFoundError("Trading system was not found: %v", id)
-	}
-
-	if ts.Username != c.Session.Username {
-		c.Log.Error("DeleteTradingSystem: Trading system not owned by user", "id", id)
-		return nil,req.NewForbiddenError("Trading system is not owned by user: %v", id)
+		return nil, err
 	}
 
 	err = db.DeleteTradingSystem(tx, id)
@@ -163,7 +141,7 @@ func DeleteTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*db.TradingSyst
 	}
 
 	tsm := TradingSystemMessage{}
-	tsm.TradingSystem = *ts
+	tsm.TradingSystem = ts
 	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msg.TypeDelete, &tsm)
 
 	if err != nil {
@@ -176,9 +154,78 @@ func DeleteTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*db.TradingSyst
 }
 
 //=============================================================================
+
+const (
+	ResponseStatusOk     = "ok"
+	ResponseStatusSkipped= "skipped"
+)
+
+//-----------------------------------------------------------------------------
+
+type FinalizationResponse struct {
+	Status  string `json:"status"`
+}
+
+//-----------------------------------------------------------------------------
+
+func FinalizeTradingSystem(tx *gorm.DB, c *auth.Context, id uint) (*FinalizationResponse, error) {
+	c.Log.Info("FinalizeTradingSystem: Finalizing trading system", "id", id)
+
+	ts, err := getTradingSystem(tx, c, id, "FinalizeTradingSystem")
+	if err != nil {
+		return nil, err
+	}
+
+	if ts.Finalized {
+		return &FinalizationResponse{
+			Status: ResponseStatusSkipped,
+		}, nil
+	}
+
+	ts.Finalized = true
+	err = db.UpdateTradingSystem(tx, ts)
+	if err != nil {
+		c.Log.Error("FinalizeTradingSystem: Cannot finalize trading system", "id", id, "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	err = sendChangeMessage(tx, c, ts, msg.TypeUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Log.Info("FinalizeTradingSystem: Trading system finalized", "id", ts.Id, "name", ts.Name)
+	return &FinalizationResponse{
+		Status: ResponseStatusOk,
+	}, nil
+}
+
+//=============================================================================
 //===
 //=== Private functions
 //===
+//=============================================================================
+
+func getTradingSystem(tx *gorm.DB, c *auth.Context, id uint, funcName string) (*db.TradingSystem, error) {
+	ts, err := db.GetTradingSystemById(tx, id)
+	if err != nil {
+		c.Log.Error(funcName+ ": Could not retrieve trading system", "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	if ts == nil {
+		c.Log.Error(funcName +": Trading system was not found", "id", id)
+		return nil,req.NewNotFoundError("Trading system was not found: %v", id)
+	}
+
+	if ts.Username != c.Session.Username {
+		c.Log.Error(funcName +": Trading system not owned by user", "id", id)
+		return nil,req.NewForbiddenError("Trading system is not owned by user: %v", id)
+	}
+
+	return ts, nil
+}
+
 //=============================================================================
 
 func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgType int) error {
@@ -218,7 +265,7 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		return err
 	}
 
-	tsm := TradingSystemMessage{*ts, *dp, *bp, *cu, *se, *ap}
+	tsm := TradingSystemMessage{ts, dp, bp, cu, se, ap}
 	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msgType, &tsm)
 
 	if err != nil {

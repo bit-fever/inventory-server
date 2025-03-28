@@ -141,11 +141,6 @@ type TradingSession struct {
 
 //=============================================================================
 
-const ScopeDevelopment = "DV"
-const ScopeReady       = "RD"
-const ScopeTrading     = "TR"
-const ScopeReview      = "RV"
-
 type TradingSystem struct {
 	Common
 	Username          string  `json:"username"`
@@ -154,12 +149,12 @@ type TradingSystem struct {
 	TradingSessionId  uint    `json:"tradingSessionId"`
 	AgentProfileId    uint    `json:"agentProfileId" gorm:"default:null"`
 	Name              string  `json:"name"`
-	Scope             string  `json:"scope"`
 	Timeframe         int     `json:"timeframe"`
 	StrategyType      string  `json:"strategyType"`
 	Overnight         bool    `json:"overnight"`
 	Tags              string  `json:"tags"`
 	ExternalRef       string  `json:"externalRef"`
+	Finalized         bool    `json:"finalized"`
 }
 
 //=============================================================================
