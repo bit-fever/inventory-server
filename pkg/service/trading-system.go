@@ -38,7 +38,8 @@ func getTradingSystems(c *auth.Context) {
 	offset, limit, err := c.GetPagingParams()
 
 	if err == nil {
-		details, err := c.GetParamAsBool("details", false)
+		var details bool
+		details, err = c.GetParamAsBool("details", false)
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
@@ -84,11 +85,13 @@ func updateTradingSystem(c *auth.Context) {
 	err := c.BindParamsFromBody(&tss)
 
 	if err == nil {
-		id,err := c.GetIdFromUrl()
+		var id uint
+		id,err = c.GetIdFromUrl()
 
 		if err == nil {
 			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				ts, err := business.UpdateTradingSystem(tx, c, id, &tss)
+				var ts *db.TradingSystem
+				ts, err = business.UpdateTradingSystem(tx, c, id, &tss)
 
 				if err != nil {
 					return err

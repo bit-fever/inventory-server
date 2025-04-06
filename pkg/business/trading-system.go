@@ -66,7 +66,7 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.Tags             = tss.Tags
 	ts.ExternalRef      = tss.ExternalRef
 
-	if ts.AgentProfileId != 0 {
+	if ts.AgentProfileId != nil {
 		//--- If the trading system is external, we don't need to start from the development phase
 		ts.Finalized = true
 	}
@@ -259,10 +259,14 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		return err
 	}
 
-	ap, err := db.GetAgentProfileById(tx, ts.AgentProfileId)
-	if err != nil {
-		c.Log.Error("sendChangeMessage: Could not retrieve agent profile of TS", "error", err.Error(), "id", ts.Id)
-		return err
+	var ap *db.AgentProfile
+
+	if ts.AgentProfileId != nil {
+		ap, err = db.GetAgentProfileById(tx, *ts.AgentProfileId)
+		if err != nil {
+			c.Log.Error("sendChangeMessage: Could not retrieve agent profile of TS", "error", err.Error(), "id", ts.Id)
+			return err
+		}
 	}
 
 	tsm := TradingSystemMessage{ts, dp, bp, cu, se, ap}

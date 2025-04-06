@@ -147,7 +147,7 @@ type TradingSystem struct {
 	DataProductId     uint    `json:"dataProductId"`
 	BrokerProductId   uint    `json:"brokerProductId"`
 	TradingSessionId  uint    `json:"tradingSessionId"`
-	AgentProfileId    uint    `json:"agentProfileId" gorm:"default:null"`
+	AgentProfileId    *uint   `json:"agentProfileId"`
 	Name              string  `json:"name"`
 	Timeframe         int     `json:"timeframe"`
 	StrategyType      string  `json:"strategyType"`
