@@ -122,6 +122,7 @@ type TradingSystemMessage struct {
 	Currency        *db.Currency        `json:"currency"`
 	TradingSession  *db.TradingSession  `json:"tradingSession"`
 	AgentProfile    *db.AgentProfile    `json:"agentProfile"`
+	Exchange        *db.Exchange        `json:"exchange"`
 }
 
 //=============================================================================

@@ -39,9 +39,11 @@ type Common struct {
 //=============================================================================
 
 type Currency struct {
-	Id   uint   `json:"id"`
-	Code string `json:"code"`
-	Name string `json:"name"`
+	Id       uint   `json:"id"`
+	Code     string `json:"code"`
+	Name     string `json:"name"`
+	Symbol   string `json:"symbol"`
+	Position int    `json:"position"`
 }
 
 //=============================================================================

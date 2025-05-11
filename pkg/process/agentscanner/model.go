@@ -34,6 +34,12 @@ type TradingSystem struct {
 	Name       string
 	DataSymbol string
 
+	TradeLists []*TradeList
+}
+
+//=============================================================================
+
+type TradeList struct {
 	Trades []*Trade
 }
 

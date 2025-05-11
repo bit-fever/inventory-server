@@ -269,7 +269,7 @@ func sendChangeMessage(tx *gorm.DB, c *auth.Context, ts *db.TradingSystem, msgTy
 		}
 	}
 
-	tsm := TradingSystemMessage{ts, dp, bp, cu, se, ap}
+	tsm := TradingSystemMessage{ts, dp, bp, cu, se, ap, ex}
 	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msgType, &tsm)
 
 	if err != nil {

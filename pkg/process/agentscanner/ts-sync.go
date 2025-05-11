@@ -186,31 +186,15 @@ func enqueueAgentTrades(tx *gorm.DB, ap *db.AgentProfile, agentTss []TradingSyst
 
 		location, err := getLocation(tx, ts)
 		if err != nil {
-			slog.Warn("Cannot retrieve timezone for trading system", "externalRef", ats.Name, "username", ap.Username, "error", err)
-			return err
+			slog.Warn("Cannot retrieve timezone for trading system. Skippinh", "externalRef", ats.Name, "username", ap.Username, "error", err)
+			continue
 		}
 
-		slog.Info("Enqueuing trades for trading system", "name", ts.Name, "username", ap.Username)
-
-		var list []*TradeItem
-
-		for _, atr := range ats.Trades {
-			tr := createTrade(&ats, atr, location)
-			if tr == nil {
-				return errors.New("aborted")
+		for _,tl := range ats.TradeLists {
+			err = sendTradeList(ts, ats.Name, tl, location)
+			if err != nil {
+				return err
 			}
-			list = append(list, tr)
-		}
-
-		message := TradeListMessage{
-			TradingSystemId: ts.Id,
-			Trades         : list,
-		}
-
-		err = msg.SendMessage(msg.ExRuntime, msg.SourceTrade, msg.TypeCreate, message)
-		if err != nil {
-			slog.Error("Cannot enqueue trades for trading system","name", ts.Name, "error", err.Error())
-			return err
 		}
 	}
 
@@ -241,7 +225,36 @@ func getLocation(tx *gorm.DB, ts *db.TradingSystem) (*time.Location, error) {
 
 //=============================================================================
 
-func createTrade(ats *TradingSystem, atr *Trade, loc *time.Location) *TradeItem {
+func sendTradeList(ts *db.TradingSystem, extRef string, tl *TradeList, location *time.Location) error {
+	var list []*TradeItem
+
+	for _, atr := range tl.Trades {
+		tr := createTrade(extRef, atr, location)
+		if tr == nil {
+			return errors.New("aborted")
+		}
+		list = append(list, tr)
+	}
+
+	message := TradeListMessage{
+		TradingSystemId: ts.Id,
+		Trades         : list,
+	}
+
+	err := msg.SendMessage(msg.ExRuntime, msg.SourceTrade, msg.TypeCreate, message)
+	if err != nil {
+		slog.Error("sendTradeList: Cannot enqueue trades for trading system","name", ts.Name, "error", err.Error())
+		return err
+	} else {
+		slog.Info("sendTradeList: Enqueued trades for trading system", "name", ts.Name, "username", ts.Username)
+	}
+
+	return nil
+}
+
+//=============================================================================
+
+func createTrade(extRef string, atr *Trade, loc *time.Location) *TradeItem {
 	tradeType := "?"
 
 	if atr.Position == 1 {
@@ -249,7 +262,7 @@ func createTrade(ats *TradingSystem, atr *Trade, loc *time.Location) *TradeItem 
 	} else if atr.Position == -1 {
 		tradeType = TradeTypeShort
 	} else {
-		slog.Error("createTrade: Unknown trade type!", "tradeType", atr.Position, "name", ats.Name)
+		slog.Error("createTrade: Unknown trade type!", "tradeType", atr.Position, "name", extRef)
 		return nil
 	}
 
@@ -257,17 +270,17 @@ func createTrade(ats *TradingSystem, atr *Trade, loc *time.Location) *TradeItem 
 	exitDate ,err2 := parseDate(atr.ExitDate,  atr.ExitTime,  loc)
 
 	if err1 != nil {
-		slog.Error("createTrade: Cannot parse entry date/time", "entryDate", atr.EntryDate, "entryTime", atr.EntryTime, "name", ats.Name)
+		slog.Error("createTrade: Cannot parse entry date/time", "entryDate", atr.EntryDate, "entryTime", atr.EntryTime, "name", extRef)
 		return nil
 	}
 
 	if err2 != nil {
-		slog.Error("createTrade: Cannot parse exit date/time", "exitDate", atr.ExitDate, "exitTime", atr.ExitTime, "name", ats.Name)
+		slog.Error("createTrade: Cannot parse exit date/time", "exitDate", atr.ExitDate, "exitTime", atr.ExitTime, "name", extRef)
 		return nil
 	}
 
 	if atr.Contracts == 0 {
-		slog.Error("createTrade: Cannot manage 0 contracts", "name", ats.Name)
+		slog.Error("createTrade: Cannot manage 0 contracts", "name", extRef)
 		return nil
 	}
 
