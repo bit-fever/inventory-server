@@ -120,3 +120,23 @@ func updateConnection(c *auth.Context) {
 }
 
 //=============================================================================
+
+func deleteConnection(c *auth.Context) {
+	id,err := c.GetIdFromUrl()
+
+	if err == nil {
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			ts,err := business.DeleteConnection(tx, c, id)
+
+			if err != nil {
+				return err
+			}
+
+			return c.ReturnObject(ts)
+		})
+	}
+
+	c.ReturnError(err)
+}
+
+//=============================================================================

@@ -26,6 +26,7 @@ package business
 
 import (
 	"github.com/bit-fever/core/auth"
+	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/core/req"
 	"github.com/bit-fever/inventory-server/pkg/db"
 	"github.com/bit-fever/inventory-server/pkg/platform"
@@ -84,8 +85,7 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 	conn.Code                 = cs.Code
 	conn.Name                 = cs.Name
 	conn.SystemCode           = cs.SystemCode
-	conn.SystemConfig         = cs.SystemConfig
-
+	conn.SystemConfigParams   = cs.SystemConfigParams
 	conn.SystemName           = sys.Name
 	conn.SupportsData         = sys.SupportsData
 	conn.SupportsBroker       = sys.SupportsBroker
@@ -113,8 +113,8 @@ func UpdateConnection(tx *gorm.DB, c *auth.Context, id uint, cs *ConnectionSpec)
 		return nil, err
 	}
 
-	conn.Name         = cs.Name
-	conn.SystemConfig = cs.SystemConfig
+	conn.Name                = cs.Name
+	conn.SystemConfigParams  = cs.SystemConfigParams
 
 	err = db.UpdateConnection(tx, conn)
 	if err != nil {
@@ -123,6 +123,36 @@ func UpdateConnection(tx *gorm.DB, c *auth.Context, id uint, cs *ConnectionSpec)
 
 	c.Log.Info("UpdateConnection: Connection updated", "id", conn.Id, "name", conn.Name)
 	return conn, err
+}
+
+//=============================================================================
+//TODO
+func DeleteConnection(tx *gorm.DB, c *auth.Context, id uint) (*db.Connection, error) {
+	c.Log.Info("DeleteConnection: Deleting connection", "id", id)
+
+	ts, err := getTradingSystem(tx, c, id, "DeleteTradingSystem")
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.DeleteTradingSystem(tx, id)
+	if err != nil {
+		c.Log.Error("DeleteTradingSystem: Cannot delete trading system", "id", id, "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	tsm := TradingSystemMessage{}
+	tsm.TradingSystem = ts
+	err = msg.SendMessage(msg.ExInventory, msg.SourceTradingSystem, msg.TypeDelete, &tsm)
+
+	if err != nil {
+		c.Log.Error("DeleteTradingSystem: Could not publish the delete message", "id", id, "error", err.Error())
+		return nil,req.NewServerErrorByError(err)
+	}
+
+	c.Log.Info("DeleteTradingSystem: Trading system deleted", "id", id, "name", ts.Name)
+//	return ts, nil
+	return nil,nil
 }
 
 //=============================================================================

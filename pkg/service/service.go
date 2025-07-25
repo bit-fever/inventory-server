@@ -65,10 +65,11 @@ func Init(router *gin.Engine, cfg *app.Config, logger *slog.Logger) {
 
 	//--- Administration
 
-	router.GET ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,      roles.Admin_User_Service))
-	router.GET ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,   roles.Admin_User_Service))
-	router.POST("/api/inventory/v1/connections",         ctrl.Secure(addConnection,       roles.Admin_User_Service))
-	router.PUT ("/api/inventory/v1/connections/:id",     ctrl.Secure(updateConnection,    roles.Admin_User_Service))
+	router.GET   ("/api/inventory/v1/connections",         ctrl.Secure(getConnections,      roles.Admin_User_Service))
+	router.GET   ("/api/inventory/v1/connections/:id",     ctrl.Secure(getConnectionById,   roles.Admin_User_Service))
+	router.POST  ("/api/inventory/v1/connections",         ctrl.Secure(addConnection,       roles.Admin_User_Service))
+	router.PUT   ("/api/inventory/v1/connections/:id",     ctrl.Secure(updateConnection,    roles.Admin_User_Service))
+	router.DELETE("/api/inventory/v1/connections/:id",     ctrl.Secure(deleteConnection,    roles.Admin_User_Service))
 }
 
 //=============================================================================

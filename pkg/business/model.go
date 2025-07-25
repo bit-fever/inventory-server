@@ -32,10 +32,10 @@ import (
 //=============================================================================
 
 type ConnectionSpec struct {
-	Code         string `json:"code"       binding:"required"`
-	Name         string `json:"name"       binding:"required"`
-	SystemCode   string `json:"systemCode" binding:"required"`
-	SystemConfig string `json:"systemConfig"`
+	Code                string `json:"code"       binding:"required"`
+	Name                string `json:"name"       binding:"required"`
+	SystemCode          string `json:"systemCode" binding:"required"`
+	SystemConfigParams  string `json:"systemConfigParams"`
 }
 
 //=============================================================================

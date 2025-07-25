@@ -66,11 +66,6 @@ func AddTradingSystem(tx *gorm.DB, c *auth.Context, tss *TradingSystemSpec) (*db
 	ts.Tags             = tss.Tags
 	ts.ExternalRef      = tss.ExternalRef
 
-	if ts.AgentProfileId != nil {
-		//--- If the trading system is external, we don't need to start from the development phase
-		ts.Finalized = true
-	}
-
 	err := db.AddTradingSystem(tx, &ts)
 	if err != nil {
 		c.Log.Error("AddTradingSystem: Could not add a new trading system", "error", err.Error())
