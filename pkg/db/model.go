@@ -67,7 +67,7 @@ type Connection struct {
 	SystemCode           string `json:"systemCode"`
 	SystemName           string `json:"systemName"`
 	SystemConfigParams   string `json:"systemConfigParams"`
-	InstanceCode         string `json:"instanceCode"`
+	Connected            bool   `json:"connected"`
 	SupportsData         bool   `json:"supportsData"`
 	SupportsBroker       bool   `json:"supportsBroker"`
 	SupportsMultipleData bool   `json:"supportsMultipleData"`

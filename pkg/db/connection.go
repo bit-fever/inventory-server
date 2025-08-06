@@ -61,6 +61,23 @@ func GetConnectionById(tx *gorm.DB, id uint) (*Connection, error) {
 
 //=============================================================================
 
+func GetConnectionByCode(tx *gorm.DB, user, code string) (*Connection, error) {
+	var list []Connection
+	res := tx.Where("username = ? AND code = ?", user, code).Find(&list)
+
+	if res.Error != nil {
+		return nil, req.NewServerErrorByError(res.Error)
+	}
+
+	if len(list) == 1 {
+		return &list[0], nil
+	}
+
+	return nil, nil
+}
+
+//=============================================================================
+
 func AddConnection(tx *gorm.DB, conn *Connection) error {
 	return tx.Create(conn).Error
 }
@@ -69,6 +86,22 @@ func AddConnection(tx *gorm.DB, conn *Connection) error {
 
 func UpdateConnection(tx *gorm.DB, conn *Connection) error {
 	return tx.Save(conn).Error
+}
+
+//=============================================================================
+
+func DisconnectAll(tx *gorm.DB) error {
+	return tx.Model(&Connection{}).
+		Where("supports_multiple_data = false").
+		Update("connected", false).Error
+}
+
+//=============================================================================
+
+func SetConnectionStatus(tx *gorm.DB, user, code string, flag bool) error {
+	return tx.Model(&Connection{}).
+		Where("username = ? AND code = ?", user, code).
+		Update("connected", flag).Error
 }
 
 //=============================================================================

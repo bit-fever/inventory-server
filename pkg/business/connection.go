@@ -91,6 +91,7 @@ func AddConnection(tx *gorm.DB, c *auth.Context, cs *ConnectionSpec) (*db.Connec
 	conn.SupportsBroker       = sys.SupportsBroker
 	conn.SupportsMultipleData = sys.SupportsMultipleData
 	conn.SupportsInventory    = sys.SupportsInventory
+	conn.Connected            = conn.SupportsMultipleData
 
 	err = db.AddConnection(tx, &conn)
 
@@ -127,6 +128,7 @@ func UpdateConnection(tx *gorm.DB, c *auth.Context, id uint, cs *ConnectionSpec)
 
 //=============================================================================
 //TODO
+
 func DeleteConnection(tx *gorm.DB, c *auth.Context, id uint) (*db.Connection, error) {
 	c.Log.Info("DeleteConnection: Deleting connection", "id", id)
 

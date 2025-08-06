@@ -1,6 +1,6 @@
 //=============================================================================
 /*
-Copyright © 2023 Andrea Carboni andrea.carboni71@gmail.com
+Copyright © 2025 Andrea Carboni andrea.carboni71@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,45 +22,25 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package main
+package system
 
-import (
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/core/messaging/system"
-	"github.com/bit-fever/inventory-server/pkg/core/process/agentscanner"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
-	"log/slog"
+//=============================================================================
+
+type ConnectionStatus int
+
+const (
+	ConnectionStatusDisconnected = 0
+	ConnectionStatusConnecting   = 1
+	ConnectionStatusConnected    = 2
 )
 
 //=============================================================================
 
-const component = "inventory-server"
-
-//=============================================================================
-
-func main() {
-	cfg := &app.Config{}
-	boot.ReadConfig(component, cfg)
-	logger := boot.InitLogger(component, &cfg.Application)
-	engine := boot.InitEngine(logger,    &cfg.Application)
-	initClients()
-	db.InitDatabase(&cfg.Database)
-	msg.InitMessaging(&cfg.Messaging)
-	service.Init(engine, cfg, logger)
-	agentscanner.InitScanner(cfg)
-	system.InitMessageListener()
-	boot.RunHttpServer(engine, &cfg.Application)
-}
-
-//=============================================================================
-
-func initClients() {
-	slog.Info("Initializing clients...")
-	req.AddClient("bf", "ca.crt", "server.crt", "server.key")
+type ConnectionChangeSystemMessage struct {
+	Username       string           `json:"username"`
+	ConnectionCode string           `json:"connectionCode"`
+	SystemCode     string           `json:"systemCode"`
+	Status         ConnectionStatus `json:"status"`
 }
 
 //=============================================================================
