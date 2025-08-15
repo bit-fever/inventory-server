@@ -56,12 +56,14 @@ type TradingSystemSpec struct {
 //=============================================================================
 
 type DataProductSpec struct {
-	ConnectionId uint    `json:"connectionId"   binding:"required"`
-	ExchangeId   uint    `json:"exchangeId"     binding:"required"`
-	Symbol       string  `json:"symbol"         binding:"required"`
-	Name         string  `json:"name"           binding:"required"`
-	MarketType   string  `json:"marketType"     binding:"required"`
-	ProductType  string  `json:"productType"    binding:"required"`
+	ConnectionId uint        `json:"connectionId"   binding:"required"`
+	ExchangeId   uint        `json:"exchangeId"     binding:"required"`
+	Symbol       string      `json:"symbol"         binding:"required"`
+	Name         string      `json:"name"           binding:"required"`
+	MarketType   string      `json:"marketType"     binding:"required"`
+	ProductType  string      `json:"productType"    binding:"required"`
+	Months       string      `json:"months"`
+	RollType     db.RollType `json:"rollType"`
 }
 
 //=============================================================================

@@ -76,6 +76,14 @@ type Connection struct {
 
 //=============================================================================
 
+type RollType int
+
+const (
+	RollTypeStandard = 0
+)
+
+//-----------------------------------------------------------------------------
+
 type DataProduct struct {
 	Common
 	ConnectionId uint     `json:"connectionId"`
@@ -85,6 +93,8 @@ type DataProduct struct {
 	Name         string   `json:"name"`
 	MarketType   string   `json:"marketType"`
 	ProductType  string   `json:"productType"`
+	Months       string   `json:"months"`
+	RollType     RollType `json:"rollType"`
 }
 
 //=============================================================================

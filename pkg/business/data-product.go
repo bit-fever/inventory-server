@@ -99,6 +99,8 @@ func AddDataProduct(tx *gorm.DB, c *auth.Context, pds *DataProductSpec) (*db.Dat
 	pd.Name         = pds.Name
 	pd.MarketType   = pds.MarketType
 	pd.ProductType  = pds.ProductType
+	pd.Months       = pds.Months
+	pd.RollType     = pds.RollType
 
 	err := db.AddDataProduct(tx, &pd)
 
@@ -131,6 +133,8 @@ func UpdateDataProduct(tx *gorm.DB, c *auth.Context, id uint, pds *DataProductSp
 	pd.Name        = pds.Name
 	pd.MarketType  = pds.MarketType
 	pd.ProductType = pds.ProductType
+	pd.Months      = pds.Months
+	pd.RollType    = pds.RollType
 
 	err = db.UpdateDataProduct(tx, pd)
 	if err != nil {
