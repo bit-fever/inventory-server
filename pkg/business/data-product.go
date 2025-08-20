@@ -133,6 +133,8 @@ func UpdateDataProduct(tx *gorm.DB, c *auth.Context, id uint, pds *DataProductSp
 	pd.Name        = pds.Name
 	pd.MarketType  = pds.MarketType
 	pd.ProductType = pds.ProductType
+
+	//TODO: Should we allow to modify these? Some recomputation is required
 	pd.Months      = pds.Months
 	pd.RollType    = pds.RollType
 
