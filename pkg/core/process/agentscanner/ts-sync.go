@@ -29,16 +29,17 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"gorm.io/gorm"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/bit-fever/core/msg"
+	"github.com/bit-fever/core/req"
+	"github.com/bit-fever/inventory-server/pkg/app"
+	"github.com/bit-fever/inventory-server/pkg/db"
+	"gorm.io/gorm"
 )
 
 //=============================================================================
@@ -186,7 +187,7 @@ func enqueueAgentTrades(tx *gorm.DB, ap *db.AgentProfile, agentTss []TradingSyst
 
 		location, err := getLocation(tx, ts)
 		if err != nil {
-			slog.Warn("Cannot retrieve timezone for trading system. Skippinh", "externalRef", ats.Name, "username", ap.Username, "error", err)
+			slog.Warn("Cannot retrieve timezone for trading system. Skipping", "externalRef", ats.Name, "username", ap.Username, "error", err)
 			continue
 		}
 
