@@ -76,25 +76,27 @@ type Connection struct {
 
 //=============================================================================
 
-type RollType int
+type DPRollTrigger string
 
 const (
-	RollTypeStandard = 0
+	DPRollTriggerSD4  = "sd4"
+	DPRollTriggerSD6  = "sd6"
+	DPRollTriggerSD30 = "sd30"
 )
 
 //-----------------------------------------------------------------------------
 
 type DataProduct struct {
 	Common
-	ConnectionId uint     `json:"connectionId"`
-	ExchangeId   uint     `json:"exchangeId"`
-	Username     string   `json:"username"`
-	Symbol       string   `json:"symbol"`
-	Name         string   `json:"name"`
-	MarketType   string   `json:"marketType"`
-	ProductType  string   `json:"productType"`
-	Months       string   `json:"months"`
-	RollType     RollType `json:"rollType"`
+	ConnectionId    uint          `json:"connectionId"`
+	ExchangeId      uint          `json:"exchangeId"`
+	Username        string        `json:"username"`
+	Symbol          string        `json:"symbol"`
+	Name            string        `json:"name"`
+	MarketType      string        `json:"marketType"`
+	ProductType     string        `json:"productType"`
+	Months          string        `json:"months"`
+	RolloverTrigger DPRollTrigger `json:"rolloverTrigger"`
 }
 
 //=============================================================================

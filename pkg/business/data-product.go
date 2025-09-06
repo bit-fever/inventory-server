@@ -92,15 +92,17 @@ func AddDataProduct(tx *gorm.DB, c *auth.Context, pds *DataProductSpec) (*db.Dat
 	c.Log.Info("AddDataProduct: Adding a new data product", "symbol", pds.Symbol, "name", pds.Name)
 
 	var pd db.DataProduct
-	pd.ConnectionId = pds.ConnectionId
-	pd.ExchangeId   = pds.ExchangeId
-	pd.Username     = c.Session.Username
-	pd.Symbol       = pds.Symbol
-	pd.Name         = pds.Name
-	pd.MarketType   = pds.MarketType
-	pd.ProductType  = pds.ProductType
-	pd.Months       = pds.Months
-	pd.RollType     = pds.RollType
+	pd.ConnectionId    = pds.ConnectionId
+	pd.ExchangeId      = pds.ExchangeId
+	pd.Username        = c.Session.Username
+	pd.Symbol          = pds.Symbol
+	pd.Name            = pds.Name
+	pd.MarketType      = pds.MarketType
+	pd.ProductType     = pds.ProductType
+	pd.Months          = pds.Months
+	pd.RolloverTrigger = pds.RolloverTrigger
+
+	//TODO: validate rollover trigger
 
 	err := db.AddDataProduct(tx, &pd)
 
@@ -135,8 +137,8 @@ func UpdateDataProduct(tx *gorm.DB, c *auth.Context, id uint, pds *DataProductSp
 	pd.ProductType = pds.ProductType
 
 	//TODO: Should we allow to modify these? Some recomputation is required
-	pd.Months      = pds.Months
-	pd.RollType    = pds.RollType
+	//pd.Months          = pds.Months
+	//pd.RolloverTrigger = pds.RolloverTrigger
 
 	err = db.UpdateDataProduct(tx, pd)
 	if err != nil {
