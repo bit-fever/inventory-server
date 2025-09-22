@@ -40,7 +40,8 @@ type TradingSystem struct {
 //=============================================================================
 
 type TradeList struct {
-	Trades []*Trade
+	Trades       []*Trade
+	DailyProfits []*DailyProfit
 }
 
 //=============================================================================
@@ -61,9 +62,19 @@ type Trade struct {
 
 //=============================================================================
 
+type DailyProfit struct {
+	Date        int
+	Time        int
+	GrossProfit float64
+	Trades      int
+}
+
+//=============================================================================
+
 type TradeListMessage struct {
-	TradingSystemId uint         `json:"tradingSystemId"`
-	Trades          []*TradeItem `json:"trades"`
+	TradingSystemId uint               `json:"tradingSystemId"`
+	Trades          []*TradeItem       `json:"trades"`
+	DailyProfits    []*DailyProfitItem `json:"dailyProfits"`
 }
 
 //=============================================================================
@@ -85,6 +96,14 @@ type TradeItem struct {
 	ExitLabel       string       `json:"exitLabel"`
 	GrossProfit     float64      `json:"grossProfit"`
 	Contracts       int          `json:"contracts"`
+}
+
+//=============================================================================
+
+type DailyProfitItem struct {
+	Day         int      `json:"day"`
+	GrossProfit float64  `json:"grossProfit"`
+	Trades      int      `json:"trades"`
 }
 
 //=============================================================================

@@ -35,6 +35,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bit-fever/core/datatype"
 	"github.com/bit-fever/core/msg"
 	"github.com/bit-fever/core/req"
 	"github.com/bit-fever/inventory-server/pkg/app"
@@ -227,19 +228,36 @@ func getLocation(tx *gorm.DB, ts *db.TradingSystem) (*time.Location, error) {
 //=============================================================================
 
 func sendTradeList(ts *db.TradingSystem, extRef string, tl *TradeList, location *time.Location) error {
-	var list []*TradeItem
+	//--- Collect trades
+
+	var tradeList []*TradeItem
 
 	for _, atr := range tl.Trades {
 		tr := createTrade(extRef, atr, location)
 		if tr == nil {
 			return errors.New("aborted")
 		}
-		list = append(list, tr)
+		tradeList = append(tradeList, tr)
 	}
+
+	//--- Collect daily profits
+
+	var dayList []*DailyProfitItem
+
+	for _, adp := range tl.DailyProfits {
+		dp := createDailyProfit(adp, location)
+		if dp == nil {
+			return errors.New("aborted")
+		}
+		dayList = append(dayList, dp)
+	}
+
+	//--- Send message
 
 	message := TradeListMessage{
 		TradingSystemId: ts.Id,
-		Trades         : list,
+		Trades         : tradeList,
+		DailyProfits   : dayList,
 	}
 
 	err := msg.SendMessage(msg.ExRuntime, msg.SourceTrade, msg.TypeCreate, message)
@@ -295,6 +313,22 @@ func createTrade(extRef string, atr *Trade, loc *time.Location) *TradeItem {
 		ExitLabel   : atr.ExitLabel,
 		GrossProfit : atr.GrossProfit,
 		Contracts   : atr.Contracts,
+	}
+}
+
+//=============================================================================
+
+func createDailyProfit(dp *DailyProfit, loc *time.Location) *DailyProfitItem {
+	date,err := parseDate(dp.Date, dp.Time, loc)
+	if err != nil {
+		slog.Error("createDailyProfit: Cannot parse date/time", "date", dp.Date, "time", dp.Time, "error", err)
+		return nil
+	}
+
+	return &DailyProfitItem{
+		Day        : int(datatype.ToIntDate(&date)),
+		GrossProfit: dp.GrossProfit,
+		Trades     : dp.Trades,
 	}
 }
 
