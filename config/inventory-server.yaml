@@ -17,3 +17,7 @@ messaging:
   address: localhost:8450
   username: rabbit-admin
   password: rabbit.admin
+provider:
+  currency:
+    baseUrl: https://api.freecurrencyapi.com/v1
+    apiKey : PUT_YOUR_API_KEY_HERE

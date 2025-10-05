@@ -26,6 +26,8 @@ package db
 
 import (
 	"time"
+
+	"github.com/bit-fever/core/datatype"
 )
 
 //=============================================================================
@@ -39,11 +41,23 @@ type Common struct {
 //=============================================================================
 
 type Currency struct {
-	Id       uint   `json:"id"`
-	Code     string `json:"code"`
-	Name     string `json:"name"`
-	Symbol   string `json:"symbol"`
-	Position int    `json:"position"`
+	Id           uint              `json:"id"`
+	Code         string            `json:"code"`
+	Name         string            `json:"name"`
+	Symbol       string            `json:"symbol"`
+	FirstDate    datatype.IntDate  `json:"firstDate"`
+	LastDate     datatype.IntDate  `json:"lastDate"`
+	LastValue    float64           `json:"lastValue"`
+	HistoryEnded bool              `json:"historyEnded"`
+}
+
+//=============================================================================
+
+type CurrencyHistory struct {
+	Id          uint              `json:"id"`
+	CurrencyId  uint              `json:"currencyId"`
+	Date        datatype.IntDate  `json:"date"`
+	Value       float64           `json:"value"`
 }
 
 //=============================================================================
@@ -199,6 +213,7 @@ type AgentProfile struct {
 //=============================================================================
 
 func (Currency)         TableName() string { return "currency"          }
+func (CurrencyHistory)  TableName() string { return "currency_history"  }
 func (Exchange)         TableName() string { return "exchange"          }
 func (Connection)       TableName() string { return "connection"        }
 func (AgentProfile)     TableName() string { return "agent_profile"     }

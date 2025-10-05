@@ -28,12 +28,26 @@ import "github.com/bit-fever/core"
 
 //=============================================================================
 
+type Currency struct {
+	BaseUrl string `json:"baseUrl"`
+	ApiKey  string `json:"apiKey"`
+}
+
+//=============================================================================
+
+type Provider struct {
+	Currency Currency `json:"currency"`
+}
+
+//=============================================================================
+
 type Config struct {
 	core.Application
 	core.Database
 	core.Authentication
 	core.Platform
 	core.Messaging
+	Provider
 }
 
 //=============================================================================

@@ -49,7 +49,7 @@ var agentMap map[uint]int = map[uint]int{}
 
 //=============================================================================
 
-func InitScanner(cfg *app.Config) *time.Ticker {
+func Init(cfg *app.Config) *time.Ticker {
 	ticker := time.NewTicker(1 * time.Hour)
 
 	go func() {
