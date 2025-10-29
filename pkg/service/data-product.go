@@ -62,19 +62,15 @@ func getDataProductById(c *auth.Context) {
 	id, err := c.GetIdFromUrl()
 
 	if err == nil {
-		details, err := c.GetParamAsBool("details", false)
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			pd, err := business.GetDataProductById(tx, c, id)
 
-		if err == nil {
-			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				pd, err := business.GetDataProductById(tx, c, id, details)
+			if err != nil {
+				return err
+			}
 
-				if err != nil {
-					return err
-				}
-
-				return c.ReturnObject(pd)
-			})
-		}
+			return c.ReturnObject(pd)
+		})
 	}
 
 	c.ReturnError(err)

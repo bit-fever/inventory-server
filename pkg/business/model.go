@@ -98,9 +98,8 @@ type TradingSession struct {
 
 type BrokerProductExt struct {
 	db.BrokerProduct
-	Connection  db.Connection         `json:"connection"`
-	Exchange    db.Exchange           `json:"exchange"`
-	Instruments []db.BrokerInstrument `json:"instruments,omitempty"`
+	Connection  db.Connection  `json:"connection"`
+	Exchange    db.Exchange    `json:"exchange"`
 }
 
 //=============================================================================

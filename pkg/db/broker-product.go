@@ -46,7 +46,7 @@ func GetBrokerProducts(tx *gorm.DB, filter map[string]any, offset int, limit int
 
 func GetBrokerProductsFull(tx *gorm.DB, filter map[string]any, offset int, limit int) (*[]BrokerProductFull, error) {
 	var list []BrokerProductFull
-	query :=	"SELECT bp.*, m.code as currency_code, c.code as connection_code, e.code as exchange_code " +
+	query :=	"SELECT bp.*, m.code as currency_code, c.code as connection_code, c.name as connection_name, e.code as exchange_code, c.system_code as system_code " +
 				"FROM broker_product bp " +
 				"LEFT JOIN connection c on bp.connection_id = c.id " +
 				"LEFT JOIN exchange   e on bp.exchange_id   = e.id "  +

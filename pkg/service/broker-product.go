@@ -62,19 +62,15 @@ func getBrokerProductById(c *auth.Context) {
 	id, err := c.GetIdFromUrl()
 
 	if err == nil {
-		details, err := c.GetParamAsBool("details", false)
+		err = db.RunInTransaction(func(tx *gorm.DB) error {
+			pb, err := business.GetBrokerProductById(tx, c, id)
 
-		if err == nil {
-			err = db.RunInTransaction(func(tx *gorm.DB) error {
-				pb, err := business.GetBrokerProductById(tx, c, id, details)
+			if err != nil {
+				return err
+			}
 
-				if err != nil {
-					return err
-				}
-
-				return c.ReturnObject(&pb)
-			})
-		}
+			return c.ReturnObject(&pb)
+		})
 	}
 
 	c.ReturnError(err)

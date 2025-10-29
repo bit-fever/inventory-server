@@ -48,7 +48,7 @@ func GetDataProducts(tx *gorm.DB, c *auth.Context, filter map[string]any, offset
 
 //=============================================================================
 
-func GetDataProductById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*DataProductExt, error) {
+func GetDataProductById(tx *gorm.DB, c *auth.Context, id uint) (*DataProductExt, error) {
 	c.Log.Info("GetDataProductById: Getting a data product", "id", id)
 
 	pd, err := getDataProductAndCheckAccess(tx, c, id, "GetDataProductById")
@@ -70,11 +70,6 @@ func GetDataProductById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*D
 	if err != nil {
 		c.Log.Error("GetDataProductById: Could not retrieve exchange", "error", err.Error())
 		return nil, err
-	}
-
-	//--- Add instruments, if it is the case
-
-	if details {
 	}
 
 	pde := DataProductExt{

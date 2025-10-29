@@ -48,7 +48,7 @@ func GetBrokerProducts(tx *gorm.DB, c *auth.Context, filter map[string]any, offs
 
 //=============================================================================
 
-func GetBrokerProductById(tx *gorm.DB, c *auth.Context, id uint, details bool) (*BrokerProductExt, error) {
+func GetBrokerProductById(tx *gorm.DB, c *auth.Context, id uint) (*BrokerProductExt, error) {
 	c.Log.Info("GetBrokerProductById: Getting a broker product", "id", id)
 
 	bp, err := getBrokerProductAndCheckAccess(tx, c, id, "GetBrokerProductById")
@@ -72,21 +72,12 @@ func GetBrokerProductById(tx *gorm.DB, c *auth.Context, id uint, details bool) (
 		return nil, err
 	}
 
-	//--- Add instruments, if it is the case
-
-	var instruments *[]db.BrokerInstrument
-
-	if details {
-		instruments, err = db.GetBrokerInstrumentsByBrokerId(tx, bp.Id)
-	}
-
 	//--- Put all together
 
 	bpe := BrokerProductExt{
 		BrokerProduct: *bp,
 		Connection:    *conn,
 		Exchange:      *ex,
-		Instruments:   *instruments,
 	}
 
 	return &bpe, nil

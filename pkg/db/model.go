@@ -118,6 +118,7 @@ type DataProduct struct {
 type DataProductFull struct {
 	DataProduct
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
+	ConnectionName  string  `json:"connectionName,omitempty"`
 	SystemCode      string  `json:"systemCode,omitempty"`
 	ExchangeCode    string  `json:"exchangeCode,omitempty"`
 }
@@ -145,6 +146,8 @@ type BrokerProductFull struct {
 	BrokerProduct
 	CurrencyCode    string  `json:"currencyCode,omitempty"`
 	ConnectionCode  string  `json:"connectionCode,omitempty"`
+	ConnectionName  string  `json:"connectionName,omitempty"`
+	SystemCode      string  `json:"systemCode,omitempty"`
 	ExchangeCode    string  `json:"exchangeCode,omitempty"`
 }
 
@@ -171,18 +174,21 @@ type TradingSession struct {
 
 type TradingSystem struct {
 	Common
-	Username          string  `json:"username"`
-	DataProductId     uint    `json:"dataProductId"`
-	BrokerProductId   uint    `json:"brokerProductId"`
-	TradingSessionId  uint    `json:"tradingSessionId"`
-	AgentProfileId    *uint   `json:"agentProfileId"`
-	Name              string  `json:"name"`
-	Timeframe         int     `json:"timeframe"`
-	StrategyType      string  `json:"strategyType"`
-	Overnight         bool    `json:"overnight"`
-	Tags              string  `json:"tags"`
-	ExternalRef       string  `json:"externalRef"`
-	Finalized         bool    `json:"finalized"`
+	Username          string           `json:"username"`
+	DataProductId     uint             `json:"dataProductId"`
+	BrokerProductId   uint             `json:"brokerProductId"`
+	TradingSessionId  uint             `json:"tradingSessionId"`
+	AgentProfileId    *uint            `json:"agentProfileId"`
+	Name              string           `json:"name"`
+	Timeframe         int              `json:"timeframe"`
+	StrategyType      string           `json:"strategyType"`
+	Overnight         bool             `json:"overnight"`
+	Tags              string           `json:"tags"`
+	ExternalRef       string           `json:"externalRef"`
+	Finalized         bool             `json:"finalized"`
+	InSampleFrom      datatype.IntDate `json:"inSampleFrom"`
+	InSampleTo        datatype.IntDate `json:"inSampleTo"`
+	EngineCode        string           `json:"engineCode"`
 }
 
 //=============================================================================
