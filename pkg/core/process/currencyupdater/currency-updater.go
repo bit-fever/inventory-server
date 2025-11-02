@@ -29,9 +29,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bit-fever/core/datatype"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/db"
+	"github.com/tradalia/core/datatype"
+	"github.com/tradalia/inventory-server/pkg/app"
+	"github.com/tradalia/inventory-server/pkg/db"
 	"gorm.io/gorm"
 )
 

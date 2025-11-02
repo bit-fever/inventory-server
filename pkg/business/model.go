@@ -25,8 +25,8 @@ THE SOFTWARE.
 package business
 
 import (
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/sick-engine/session"
+	"github.com/tradalia/inventory-server/pkg/db"
+	"github.com/tradalia/sick-engine/session"
 )
 
 //=============================================================================

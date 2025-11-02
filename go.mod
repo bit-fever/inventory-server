@@ -1,10 +1,10 @@
-module github.com/bit-fever/inventory-server
+module github.com/tradalia/inventory-server
 
 go 1.24.0
 
 require (
-	github.com/bit-fever/core v1.10.8
-	github.com/bit-fever/sick-engine v0.0.2
+	github.com/tradalia/core v1.10.8
+	github.com/tradalia/sick-engine v0.0.2
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	gorm.io/driver/mysql v1.6.0

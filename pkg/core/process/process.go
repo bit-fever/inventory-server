@@ -25,9 +25,9 @@ THE SOFTWARE.
 package process
 
 import (
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/core/process/agentscanner"
-	"github.com/bit-fever/inventory-server/pkg/core/process/currencyupdater"
+	"github.com/tradalia/inventory-server/pkg/app"
+	"github.com/tradalia/inventory-server/pkg/core/process/agentscanner"
+	"github.com/tradalia/inventory-server/pkg/core/process/currencyupdater"
 )
 
 //=============================================================================

@@ -25,11 +25,11 @@ THE SOFTWARE.
 package business
 
 import (
-	"github.com/bit-fever/core/auth"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/platform"
+	"github.com/tradalia/core/auth"
+	"github.com/tradalia/core/msg"
+	"github.com/tradalia/core/req"
+	"github.com/tradalia/inventory-server/pkg/db"
+	"github.com/tradalia/inventory-server/pkg/platform"
 	"gorm.io/gorm"
 )
 

@@ -27,14 +27,14 @@ package main
 import (
 	"log/slog"
 
-	"github.com/bit-fever/core/boot"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/core/req"
-	"github.com/bit-fever/inventory-server/pkg/app"
-	"github.com/bit-fever/inventory-server/pkg/core/messaging/system"
-	"github.com/bit-fever/inventory-server/pkg/core/process"
-	"github.com/bit-fever/inventory-server/pkg/db"
-	"github.com/bit-fever/inventory-server/pkg/service"
+	"github.com/tradalia/core/boot"
+	"github.com/tradalia/core/msg"
+	"github.com/tradalia/core/req"
+	"github.com/tradalia/inventory-server/pkg/app"
+	"github.com/tradalia/inventory-server/pkg/core/messaging/system"
+	"github.com/tradalia/inventory-server/pkg/core/process"
+	"github.com/tradalia/inventory-server/pkg/db"
+	"github.com/tradalia/inventory-server/pkg/service"
 )
 
 //=============================================================================

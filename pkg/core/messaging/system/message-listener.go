@@ -26,8 +26,8 @@ package system
 
 import (
 	"encoding/json"
-	"github.com/bit-fever/core/msg"
-	"github.com/bit-fever/inventory-server/pkg/db"
+	"github.com/tradalia/core/msg"
+	"github.com/tradalia/inventory-server/pkg/db"
 	"gorm.io/gorm"
 	"log/slog"
 )
