@@ -5,14 +5,14 @@ application:
 database:
   address: localhost:3400
   name: inventory
-  username: bitfever
-  password: bitfever
+  username: tradalia
+  password: tradalia
 authentication:
-  authority: https://bitfever-server:8443/auth/realms/bitfever
-  clientId: bitfever-backend
+  authority: https://tradalia-server:8443/auth/realms/tradalia
+  clientId: tradalia-backend
   clientSecret: xyz
 platform:
-  system: https://bitfever-server:8449/api/system
+  system: https://tradalia-server:8449/api/system
 messaging:
   address: localhost:8450
   username: rabbit-admin
@@ -20,4 +20,4 @@ messaging:
 provider:
   currency:
     baseUrl: https://api.freecurrencyapi.com/v1
-    apiKey : fca_live_PEgz9oUDbBGePkYR5UtVnhAU739eVYptqKvC9mTd
+    apiKey : YOUR_API_KEY_HERE
